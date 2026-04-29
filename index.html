@@ -66,6 +66,32 @@
       z-index: 1;
     }
 
+    /* Animated orbs */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat linear infinite;
+    }
+    .orb1 { width: 550px; height: 550px; background: #3a2a6e; top: -150px; left: -150px; animation-duration: 22s; }
+    .orb2 { width: 420px; height: 420px; background: #0d3a5c; top: 35%; right: -100px; animation-duration: 28s; animation-delay: -9s; }
+    .orb3 { width: 380px; height: 380px; background: #2e1a4a; bottom: -100px; left: 25%; animation-duration: 19s; animation-delay: -5s; }
+    .orb4 { width: 280px; height: 280px; background: #4a1e1e; top: 55%; left: 15%; animation-duration: 24s; animation-delay: -13s; }
+
+    @keyframes orbFloat {
+      0%   { transform: translate(0, 0) scale(1); }
+      25%  { transform: translate(50px, -40px) scale(1.06); }
+      50%  { transform: translate(25px, 60px) scale(0.94); }
+      75%  { transform: translate(-40px, 25px) scale(1.03); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    /* Particle canvas */
+    #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
     /* Layout */
     .site { position: relative; z-index: 2; }
 
@@ -353,6 +379,12 @@
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
 
+  <canvas id="particles"></canvas>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+
   <div class="site">
 
     <nav>
@@ -366,7 +398,6 @@
     <!-- Hero -->
     <section class="hero">
       <div class="hero-bg-text">MEIYO</div>
-      <div class="hero-tag">— Kişisel Alan</div>
       <h1 class="hero-title">
         Merhaba,<br>
         ben <em>Meiyo.</em>
@@ -395,14 +426,13 @@
       <div class="about-grid">
         <div class="about-text reveal">
           <p>
-            Meiyo, benim için bir başlangıç noktası. Bu site, kim olduğumu ve neler yaptığımı anlatacak — zamanla büyüyecek, değişecek.
+            Merhaba, ben Meiyo. 24 yaşındayım ve bu köşe bana ait — düşüncelerimi, ilgimi çeken şeyleri ve kendimi paylaştığım bir alan.
           </p>
           <p>
-            Şu an her şey henüz yeni. Ama bu yeni olmak güzel bir şey; her şeyi baştan yazabilirsin.
+            Oyun oynamak benim için sadece bir hobi değil; farklı dünyalara açılan bir kapı. Her oyun yeni bir hikaye, yeni bir deneyim.
           </p>
           <p>
-            <!-- Buraya kendinle ilgili birkaç cümle ekleyebilirsin. -->
-            Neler yapıyorsun? Ne seni heyecanlandırıyor? Bu alanı seninle dolduralım.
+            Burası zamanla büyüyecek, şekillenecek — tıpkı ben gibi.
           </p>
         </div>
         <div class="about-details reveal">
@@ -411,16 +441,12 @@
             <span class="detail-val">Meiyo</span>
           </div>
           <div class="detail-row">
-            <span class="detail-label">Konum</span>
-            <span class="detail-val">— Eklenecek</span>
+            <span class="detail-label">Yaş</span>
+            <span class="detail-val">24</span>
           </div>
           <div class="detail-row">
             <span class="detail-label">İlgi Alanları</span>
-            <span class="detail-val">— Eklenecek</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Site</span>
-            <span class="detail-val">meiyo.world</span>
+            <span class="detail-val">Oyun, Teknoloji</span>
           </div>
         </div>
       </div>
@@ -429,7 +455,7 @@
     <!-- Quote -->
     <div class="quote-block reveal">
       <p class="quote-text">
-        "Bir yolculuk binlerce adımla başlar — ama asıl önemli olan ilk adımı atmaktır."
+        "Bunu bi makalede okumuştum."
       </p>
       <p class="quote-author">— Meiyo</p>
     </div>
@@ -449,8 +475,14 @@
           <br>
           <p>
             Doğrudan ulaşmak istersen:<br>
-            <a href="mailto:meiyo@meiyo.world">meiyo@meiyo.world</a>
+            <a href="mailto:meiyoderler@gmail.com">meiyoderler@gmail.com</a>
           </p>
+          <br>
+          <p>Sosyal medyada bul:</p>
+          <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+            <a href="https://instagram.com/realmeiyo" target="_blank" class="btn btn-ghost" style="padding:8px 16px; font-size:11px;">Instagram</a>
+            <a href="https://twitter.com/themeiyo" target="_blank" class="btn btn-ghost" style="padding:8px 16px; font-size:11px;">Twitter / X</a>
+          </div>
         </div>
         <form class="contact-form reveal" onsubmit="handleSubmit(event)">
           <div class="form-group">
@@ -481,7 +513,50 @@
   </div>
 
   <script>
-    // Custom cursor
+    // Particles
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, dots = [];
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    for (let i = 0; i < 80; i++) {
+      dots.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 1.2 + 0.3,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
+        o: Math.random() * 0.5 + 0.1
+      });
+    }
+    function drawParticles() {
+      ctx.clearRect(0, 0, W, H);
+      dots.forEach(d => {
+        d.x += d.vx; d.y += d.vy;
+        if (d.x < 0) d.x = W; if (d.x > W) d.x = 0;
+        if (d.y < 0) d.y = H; if (d.y > H) d.y = 0;
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,185,154,${d.o})`;
+        ctx.fill();
+      });
+      dots.forEach((a, i) => {
+        dots.slice(i + 1).forEach(b => {
+          const dist = Math.hypot(a.x - b.x, a.y - b.y);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.strokeStyle = `rgba(201,185,154,${0.06 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        });
+      });
+      requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
     const cursor = document.getElementById('cursor');
     const ring = document.getElementById('cursorRing');
     let mx = 0, my = 0, rx = 0, ry = 0;
