@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meiyo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --bg2: #111111;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8e4dd;
+      --muted: rgba(232,228,221,0.38);
+      --accent: #c9b99a;
+      --accent2: rgba(201,185,154,0.12);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-weight: 300;
+      font-size: 14px;
+      line-height: 1.8;
+      cursor: none;
+      min-height: 100vh;
+    }
+
+    /* Custom cursor */
+    .cursor {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, opacity 0.2s;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      width: 28px; height: 28px;
+      border: 0.5px solid rgba(201,185,154,0.4);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.4s cubic-bezier(.23,1,.32,1), width 0.3s, height 0.3s, opacity 0.2s;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Noise overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Layout */
+    .site { position: relative; z-index: 2; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.4rem 2.5rem;
+      border-bottom: 0.5px solid var(--border);
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 2.5rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-text {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(100px, 18vw, 200px);
+      font-weight: 300;
+      color: rgba(255,255,255,0.022);
+      white-space: nowrap;
+      pointer-events: none;
+      letter-spacing: 0.08em;
+      user-select: none;
+    }
+    .hero-tag {
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      color: var(--accent);
+      margin-bottom: 1.8rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 8vw, 96px);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.35s forwards;
+    }
+    .hero-title em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero-desc {
+      max-width: 420px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.9;
+      margin-bottom: 3rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.65s forwards;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 24px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      transition: all 0.25s;
+      border-radius: 2px;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #0a0a0a;
+      border: 1px solid var(--accent);
+    }
+    .btn-primary:hover { background: transparent; color: var(--accent); }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 0.5px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem; left: 2.5rem;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 10px; letter-spacing: 0.18em;
+      opacity: 0; animation: fadeUp 1s 1s forwards;
+    }
+    .scroll-line {
+      width: 36px; height: 0.5px;
+      background: var(--muted);
+      animation: expand 2s 1.5s ease forwards;
+      transform-origin: left;
+      transform: scaleX(0);
+    }
+    @keyframes expand { to { transform: scaleX(1); } }
+
+    /* Section shared */
+    section { padding: 6rem 2.5rem; }
+    .section-header {
+      display: flex; align-items: center; gap: 1.5rem;
+      margin-bottom: 3.5rem;
+    }
+    .section-num {
+      font-size: 10px; letter-spacing: 0.2em; color: var(--accent);
+    }
+    .section-line { flex: 1; height: 0.5px; background: var(--border); }
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 300;
+      line-height: 1.1;
+    }
+
+    /* About */
+    #hakkimda { border-top: 0.5px solid var(--border); }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .about-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+    .about-text p {
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+      font-size: 13px;
+      line-height: 2;
+    }
+    .about-text p:last-child { margin-bottom: 0; }
+
+    .about-details { display: flex; flex-direction: column; gap: 1px; }
+    .detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 12px;
+    }
+    .detail-row:first-child { border-top: 0.5px solid var(--border); }
+    .detail-label { color: var(--muted); letter-spacing: 0.1em; }
+    .detail-val { color: var(--text); }
+
+    /* Decorative quote */
+    .quote-block {
+      margin: 5rem 2.5rem;
+      padding: 3rem;
+      border-left: 1px solid var(--accent);
+      background: var(--accent2);
+      border-radius: 0 4px 4px 0;
+    }
+    .quote-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(20px, 3vw, 28px);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .quote-author { font-size: 11px; letter-spacing: 0.15em; color: var(--accent); }
+
+    /* Contact */
+    #iletisim { border-top: 0.5px solid var(--border); }
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    @media (max-width: 640px) { .contact-wrap { grid-template-columns: 1fr; gap: 2rem; } }
+
+    .contact-intro {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 2;
+    }
+    .contact-intro a {
+      color: var(--accent);
+      text-decoration: none;
+      border-bottom: 0.5px solid var(--accent);
+      padding-bottom: 1px;
+    }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); }
+    .form-input, .form-textarea {
+      background: var(--bg2);
+      border: 0.5px solid var(--border);
+      border-radius: 2px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 300;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-textarea { min-height: 120px; }
+    .form-divider { height: 1rem; }
+    .form-submit {
+      align-self: flex-start;
+      background: transparent;
+      border: 0.5px solid var(--border);
+      color: var(--muted);
+      padding: 11px 26px;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      border-radius: 2px;
+      cursor: none;
+      transition: all 0.25s;
+    }
+    .form-submit:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Footer */
+    footer {
+      border-top: 0.5px solid var(--border);
+      padding: 2rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .footer-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+    .footer-right { font-size: 11px; color: var(--muted); letter-spacing: 0.1em; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <div class="site">
+
+    <nav>
+      <a href="#" class="nav-logo">Meiyo</a>
+      <ul class="nav-links">
+        <li><a href="#hakkimda">Hakkımda</a></li>
+        <li><a href="#iletisim">İletişim</a></li>
+      </ul>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-bg-text">MEIYO</div>
+      <div class="hero-tag">— Kişisel Alan</div>
+      <h1 class="hero-title">
+        Merhaba,<br>
+        ben <em>Meiyo.</em>
+      </h1>
+      <p class="hero-desc">
+        Burası benim köşem. Düşüncelerimi, ilgimi çeken şeyleri ve kendimi keşfettiğim bir alan.
+        Henüz şekilleniyor — tıpkı ben gibi.
+      </p>
+      <div class="hero-actions">
+        <a href="#hakkimda" class="btn btn-primary">Tanışalım</a>
+        <a href="#iletisim" class="btn btn-ghost">İletişime Geç</a>
+      </div>
+      <div class="hero-scroll">
+        <div class="scroll-line"></div>
+        Aşağı Kaydır
+      </div>
+    </section>
+
+    <!-- About -->
+    <section id="hakkimda">
+      <div class="section-header reveal">
+        <span class="section-num">01</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom:3rem;">Hakkımda</h2>
+      <div class="about-grid">
+        <div class="about-text reveal">
+          <p>
+            Meiyo, benim için bir başlangıç noktası. Bu site, kim olduğumu ve neler yaptığımı anlatacak — zamanla büyüyecek, değişecek.
+          </p>
+          <p>
+            Şu an her şey henüz yeni. Ama bu yeni olmak güzel bir şey; her şeyi baştan yazabilirsin.
+          </p>
+          <p>
+            <!-- Buraya kendinle ilgili birkaç cümle ekleyebilirsin. -->
+            Neler yapıyorsun? Ne seni heyecanlandırıyor? Bu alanı seninle dolduralım.
+          </p>
+        </div>
+        <div class="about-details reveal">
+          <div class="detail-row">
+            <span class="detail-label">İsim</span>
+            <span class="detail-val">Meiyo</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Konum</span>
+            <span class="detail-val">— Eklenecek</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">İlgi Alanları</span>
+            <span class="detail-val">— Eklenecek</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Site</span>
+            <span class="detail-val">meiyo.world</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quote -->
+    <div class="quote-block reveal">
+      <p class="quote-text">
+        "Bir yolculuk binlerce adımla başlar — ama asıl önemli olan ilk adımı atmaktır."
+      </p>
+      <p class="quote-author">— Meiyo</p>
+    </div>
+
+    <!-- Contact -->
+    <section id="iletisim">
+      <div class="section-header reveal">
+        <span class="section-num">02</span>
+        <div class="section-line"></div>
+      </div>
+      <h2 class="section-title reveal" style="margin-bottom:3rem;">İletişim</h2>
+      <div class="contact-wrap">
+        <div class="contact-intro reveal">
+          <p>
+            Merhaba demek, soru sormak ya da sadece bir şeyler paylaşmak istiyorsan buradayım.
+          </p>
+          <br>
+          <p>
+            Doğrudan ulaşmak istersen:<br>
+            <a href="mailto:meiyo@meiyo.world">meiyo@meiyo.world</a>
+          </p>
+        </div>
+        <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+          <div class="form-group">
+            <label class="form-label">İsmin</label>
+            <input type="text" class="form-input" placeholder="Adın nedir?" required />
+          </div>
+          <div class="form-divider"></div>
+          <div class="form-group">
+            <label class="form-label">E-posta</label>
+            <input type="email" class="form-input" placeholder="mail@ornek.com" required />
+          </div>
+          <div class="form-divider"></div>
+          <div class="form-group">
+            <label class="form-label">Mesaj</label>
+            <textarea class="form-textarea" placeholder="Ne düşünüyorsun?" required></textarea>
+          </div>
+          <div class="form-divider"></div>
+          <button type="submit" class="form-submit">Gönder →</button>
+        </form>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-logo">Meiyo</div>
+      <div class="footer-right">© 2026 meiyo.world</div>
+    </footer>
+
+  </div>
+
+  <script>
+    // Custom cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+    });
+    function animRing() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    }
+    animRing();
+    document.querySelectorAll('a, button, .btn, input, textarea').forEach(el => {
+      el.addEventListener('mouseenter', () => { ring.style.width = '44px'; ring.style.height = '44px'; });
+      el.addEventListener('mouseleave', () => { ring.style.width = '28px'; ring.style.height = '28px'; });
+    });
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach((e, i) => {
+        if (e.isIntersecting) {
+          setTimeout(() => e.target.classList.add('visible'), i * 80);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => obs.observe(el));
+
+    // Form
+    function handleSubmit(e) {
+      e.preventDefault();
+      const btn = e.target.querySelector('.form-submit');
+      btn.textContent = 'Gönderildi ✓';
+      btn.style.borderColor = '#c9b99a';
+      btn.style.color = '#c9b99a';
+      setTimeout(() => { btn.textContent = 'Gönder →'; btn.style.borderColor = ''; btn.style.color = ''; e.target.reset(); }, 3000);
+    }
+  </script>
+</body>
+</html>
