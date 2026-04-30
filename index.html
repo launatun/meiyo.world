@@ -391,14 +391,13 @@
       <a href="#" class="nav-logo">Meiyo</a>
       <ul class="nav-links">
         <li><a href="#hakkimda">Hakkımda</a></li>
-        <li><a href="chess.html">Satranç</a></li>
         <li><a href="#iletisim">İletişim</a></li>
+        <li><a href="chess.html">Satranç</a></li>
       </ul>
     </nav>
 
     <!-- Hero -->
     <section class="hero">
-      <div class="hero-bg-text">MEIYO</div>
       <h1 class="hero-title">
         Merhaba,<br>
         ben <em>Meiyo.</em>
@@ -429,27 +428,8 @@
           <p>
             Merhaba, ben Meiyo. 24 yaşındayım ve bu köşe bana ait — düşüncelerimi, ilgimi çeken şeyleri ve kendimi paylaştığım bir alan.
           </p>
-          <p>
-            Oyun oynamak benim için sadece bir hobi değil; farklı dünyalara açılan bir kapı. Her oyun yeni bir hikaye, yeni bir deneyim.
-          </p>
-          <p>
-            Burası zamanla büyüyecek, şekillenecek — tıpkı ben gibi.
-          </p>
         </div>
-        <div class="about-details reveal">
-          <div class="detail-row">
-            <span class="detail-label">İsim</span>
-            <span class="detail-val">Meiyo</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Yaş</span>
-            <span class="detail-val">24</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">İlgi Alanları</span>
-            <span class="detail-val">Oyun, Teknoloji</span>
-          </div>
-        </div>
+
       </div>
     </section>
 
@@ -485,20 +465,20 @@
             <a href="https://twitter.com/themeiyo" target="_blank" class="btn btn-ghost" style="padding:8px 16px; font-size:11px;">Twitter / X</a>
           </div>
         </div>
-        <form class="contact-form reveal" onsubmit="handleSubmit(event)">
+        <form class="contact-form reveal" action="https://formspree.io/f/mdabnqop" method="POST" onsubmit="handleSubmit(event)">
           <div class="form-group">
             <label class="form-label">İsmin</label>
-            <input type="text" class="form-input" placeholder="Adın nedir?" required />
+            <input type="text" name="name" class="form-input" placeholder="Adın nedir?" required />
           </div>
           <div class="form-divider"></div>
           <div class="form-group">
             <label class="form-label">E-posta</label>
-            <input type="email" class="form-input" placeholder="mail@ornek.com" required />
+            <input type="email" name="email" class="form-input" placeholder="mail@ornek.com" required />
           </div>
           <div class="form-divider"></div>
           <div class="form-group">
             <label class="form-label">Mesaj</label>
-            <textarea class="form-textarea" placeholder="Ne düşünüyorsun?" required></textarea>
+            <textarea name="message" class="form-textarea" placeholder="Ne düşünüyorsun?" required></textarea>
           </div>
           <div class="form-divider"></div>
           <button type="submit" class="form-submit">Gönder →</button>
@@ -592,13 +572,31 @@
     reveals.forEach(el => obs.observe(el));
 
     // Form
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
       e.preventDefault();
       const btn = e.target.querySelector('.form-submit');
-      btn.textContent = 'Gönderildi ✓';
-      btn.style.borderColor = '#c9b99a';
-      btn.style.color = '#c9b99a';
-      setTimeout(() => { btn.textContent = 'Gönder →'; btn.style.borderColor = ''; btn.style.color = ''; e.target.reset(); }, 3000);
+      btn.textContent = 'Gönderiliyor...';
+      btn.disabled = true;
+      try {
+        const res = await fetch(e.target.action, {
+          method: 'POST',
+          body: new FormData(e.target),
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok) {
+          btn.textContent = 'Gönderildi ✓';
+          btn.style.borderColor = '#c9b99a';
+          btn.style.color = '#c9b99a';
+          e.target.reset();
+          setTimeout(() => { btn.textContent = 'Gönder →'; btn.style.borderColor = ''; btn.style.color = ''; btn.disabled = false; }, 3000);
+        } else {
+          btn.textContent = 'Hata — tekrar dene';
+          btn.disabled = false;
+        }
+      } catch {
+        btn.textContent = 'Hata — tekrar dene';
+        btn.disabled = false;
+      }
     }
   </script>
 </body>
