@@ -4,6 +4,53 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Meiyo</title>
+  <canvas id="faviconCanvas" style="display:none"></canvas>
+  <script>
+    (function() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 64; canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      let angle = 0;
+      const link = document.createElement('link');
+      link.rel = 'icon'; link.type = 'image/png';
+      document.head.appendChild(link);
+
+      function drawFavicon() {
+        ctx.clearRect(0, 0, 64, 64);
+
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(32, 32, 30, 0, Math.PI * 2);
+        ctx.fillStyle = '#0a0a0a';
+        ctx.fill();
+
+        // Rotating arc
+        ctx.beginPath();
+        ctx.arc(32, 32, 26, angle, angle + Math.PI * 1.4);
+        ctx.strokeStyle = '#c9b99a';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+
+        // M letter in center
+        ctx.save();
+        ctx.translate(32, 32);
+        const scale = 0.85 + Math.sin(angle * 2) * 0.08;
+        ctx.scale(scale, scale);
+        ctx.font = 'bold 28px serif';
+        ctx.fillStyle = '#e8e4dd';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('M', 0, 1);
+        ctx.restore();
+
+        angle += 0.04;
+        link.href = canvas.toDataURL('image/png');
+        requestAnimationFrame(drawFavicon);
+      }
+      drawFavicon();
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet" />
