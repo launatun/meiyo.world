@@ -37,6 +37,36 @@
       50% { opacity: 0.7; transform: scale(1.4); }
     }
 
+
+    /* Shooting stars */
+    .shooting-star {
+      position: fixed;
+      pointer-events: none;
+      z-index: 2;
+      opacity: 0;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 6px 2px rgba(255,255,255,0.9), 0 0 12px 4px rgba(201,185,154,0.5);
+    }
+    .shooting-star::after {
+      content: '';
+      position: absolute;
+      top: 50%; right: 2px;
+      transform: translateY(-50%) rotate(var(--trail-angle));
+      transform-origin: right center;
+      width: var(--trail-len);
+      height: 1.5px;
+      border-radius: 2px;
+      background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(201,185,154,0.3), transparent);
+    }
+    @keyframes shoot {
+      0%   { opacity: 0; transform: translate(0, 0) rotate(var(--angle)); }
+      8%   { opacity: 1; }
+      85%  { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--angle)); }
+    }
+
     /* Cursor */
     .cursor {
       width: 5px; height: 5px;
@@ -137,17 +167,36 @@
 
     /* Heart pulse */
     .heart {
-      font-size: 18px;
+      font-size: 14px;
       opacity: 0;
-      animation: fadeUp 1s 1.9s forwards, heartbeat 2s 2.5s ease-in-out infinite;
+      animation: fadeUp 1s 1.9s forwards, heartbeat 2.2s 2.5s ease-in-out infinite;
       color: #c9b99a;
     }
     @keyframes heartbeat {
-      0%, 100% { transform: scale(1); }
-      15% { transform: scale(1.25); }
-      30% { transform: scale(1); }
-      45% { transform: scale(1.15); }
-      60% { transform: scale(1); }
+      0%, 100% { transform: scale(1); opacity: 0.7; }
+      15% { transform: scale(1.2); opacity: 1; }
+      30% { transform: scale(1); opacity: 0.7; }
+      45% { transform: scale(1.1); opacity: 0.9; }
+      60% { transform: scale(1); opacity: 0.7; }
+    }
+    /* Shooting heart */
+    .shoot-heart {
+      position: fixed;
+      font-size: 11px;
+      pointer-events: none;
+      z-index: 3;
+      color: #c9b99a;
+      opacity: 0;
+      text-shadow: 0 0 8px rgba(201,185,154,0.8), 0 0 16px rgba(201,185,154,0.4);
+      transform: translate(-50%, -50%);
+      animation: heartAppear 1.8s ease-out forwards;
+    }
+    @keyframes heartAppear {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.3); }
+      20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+      40%  { opacity: 0.9; transform: translate(-50%, -50%) scale(1); }
+      70%  { opacity: 0.7; transform: translate(-50%, -50%) scale(0.95); }
+      100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
     }
 
     /* Floating petals */
@@ -179,7 +228,7 @@
   <div class="stars" id="stars"></div>
 
   <div class="wrap">
-    <div class="date-line">01.01.2026 — bugün</div>
+    <div class="date-line">01.01.2026 — Bugün</div>
 
     <div class="counter-wrap">
       <div class="counter-number" id="days">0</div>
@@ -202,7 +251,7 @@
     </div>
 
     <div class="quote">
-      "1 Ocak'ta bir şey değişti.<br>Fark ettim mi bilmiyorum —<br>ama her şey farklıydı artık."
+      Zamanı seninle ölçmek onu daha da anlamlı yapıyor bebişim..
     </div>
 
     <div class="heart">♡</div>
@@ -237,7 +286,8 @@
     }
 
     // Counter
-    const start = new Date('2026-01-01T00:00:00');
+    // 1 Ocak 2026 00:00 Türkiye saati = 21:00 UTC önceki gün
+    const start = new Date('2025-12-31T21:00:00Z');
     function update() {
       const now = new Date();
       const diff = now - start;
@@ -252,6 +302,66 @@
     }
     update();
     setInterval(update, 1000);
+
+    // Shooting stars
+    function createShootingStar() {
+      const star = document.createElement('div');
+      star.className = 'shooting-star';
+
+      // Start from top edge, random X position
+      const startX = Math.random() * window.innerWidth;
+      const startY = -10;
+
+      // Angle: mostly downward, slight diagonal (60-80 degrees from horizontal)
+      const angleDeg = 65 + Math.random() * 20;
+      const angleRad = angleDeg * Math.PI / 180;
+      const dist = 300 + Math.random() * 300;
+      const dx = Math.cos(angleRad) * dist * (Math.random() > 0.5 ? 1 : -1);
+      const dy = Math.sin(angleRad) * dist;
+
+      const duration = 900 + Math.random() * 500;
+      const size = 3 + Math.random() * 2.5;
+      const trailLen = 120 + Math.random() * 100;
+
+      star.style.left = startX + 'px';
+      star.style.top = startY + 'px';
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.setProperty('--dx', dx + 'px');
+      star.style.setProperty('--dy', dy + 'px');
+      star.style.setProperty('--angle', angleDeg + 'deg');
+      star.style.setProperty('--trail-len', trailLen + 'px');
+      star.style.setProperty('--trail-angle', '0deg');
+      star.style.boxShadow = `0 0 ${size*2}px ${size}px rgba(255,255,255,0.95), 0 0 ${size*5}px ${size*2}px rgba(201,185,154,0.6)`;
+      star.style.animation = `shoot ${duration}ms cubic-bezier(0.2,0.8,0.4,1) forwards`;
+
+      document.body.appendChild(star);
+      // Spawn heart at landing point
+      const landX = startX + dx;
+      const landY = startY + dy;
+      setTimeout(() => {
+        star.remove();
+        spawnHeart(landX, landY);
+      }, duration);
+    }
+
+    function scheduleShoot() {
+      createShootingStar();
+      // Next one in 4-9 seconds — visible, not too frequent
+      setTimeout(scheduleShoot, 4000 + Math.random() * 5000);
+    }
+    setTimeout(scheduleShoot, 2000);
+
+    // Spawn heart at shooting star landing point
+    function spawnHeart(x, y) {
+      const h = document.createElement('div');
+      h.className = 'shoot-heart';
+      h.textContent = '♡';
+      h.style.left = x + 'px';
+      h.style.top = y + 'px';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1900);
+    }
   </script>
 </body>
 </html>
