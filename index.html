@@ -243,6 +243,7 @@
       text-overflow: ellipsis;
       max-width: 200px;
     }
+    .np-label { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.15em; color: var(--accent); margin-bottom: 2px; }
     .np-artist {
       font-family: 'DM Mono', monospace;
       font-size: 9px;
@@ -377,6 +378,7 @@
       <div class="np-bar"></div>
     </div>
     <div class="np-info">
+      <div class="np-label" id="npLabel">Son dinledi</div>
       <div class="np-title" id="npTitle">—</div>
       <div class="np-artist" id="npArtist">—</div>
     </div>
@@ -527,16 +529,18 @@
         const tracks = data.recenttracks?.track;
         if (!tracks || tracks.length === 0) return;
         const track = Array.isArray(tracks) ? tracks[0] : tracks;
-        const isPlaying = track['@attr']?.nowplaying === 'true';
         const el = document.getElementById('nowPlaying');
+        document.getElementById('npTitle').textContent = track.name;
+        document.getElementById('npArtist').textContent = track.artist['#text'];
+        const isPlaying = track['@attr']?.nowplaying === 'true';
         if (isPlaying) {
-          document.getElementById('npTitle').textContent = track.name;
-          document.getElementById('npArtist').textContent = track.artist['#text'];
           document.getElementById('npBars').classList.remove('paused');
-          el.classList.remove('hidden');
+          document.getElementById('npLabel').textContent = 'Şu an dinliyor';
         } else {
-          el.classList.add('hidden');
+          document.getElementById('npBars').classList.add('paused');
+          document.getElementById('npLabel').textContent = 'Son dinledi';
         }
+        el.classList.remove('hidden');
       } catch(e) {}
     }
 
