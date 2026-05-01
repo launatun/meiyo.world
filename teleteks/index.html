@@ -603,7 +603,7 @@ async function showHava() {
     results.forEach(c => {
       const temp = c.temp != null ? Math.round(c.temp) + '°C' : '--°C';
       const desc = codes[c.code] ?? (c.code !== null ? 'Kod:'+c.code : 'Bağlanılamadı');
-      const fg = c.temp > 25 ? 'fg-red' : c.temp > 15 ? 'fg-yellow' : 'fg-cyan';
+      const fg = c.temp > 30 ? 'fg-red' : c.temp > 20 ? 'fg-yellow' : 'fg-cyan';
       screen.appendChild(row(cell(
         pad(' '+c.name, 16) + padL(temp, 10) + '  ' + pad(desc, 20),
         fg, 'bg-black'
