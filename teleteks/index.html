@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Meiyotext</title>
+  <title>MEIYO TELETEXT</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
 
@@ -28,18 +29,20 @@
       align-items: center;
       justify-content: flex-start;
       min-height: 100vh;
-      padding: 20px;
+      padding: 8px;
       font-family: 'VT323', monospace;
     }
 
     /* TV Frame */
     .tv-frame {
-      width: min(780px, 98vw);
+      width: 100%;
+      max-width: 780px;
       background: #1a1a1a;
       border: 3px solid #333;
       border-radius: 8px;
-      padding: 12px;
+      padding: 6px;
       box-shadow: 0 0 40px rgba(0,0,100,0.4), inset 0 0 20px rgba(0,0,0,0.8);
+      box-sizing: border-box;
     }
 
     /* Screen */
@@ -63,7 +66,7 @@
     .tt {
       background: var(--black);
       padding: 0;
-      font-size: clamp(14px, 2.2vw, 22px);
+      font-size: clamp(11px, 3.2vw, 22px);
       line-height: 1.35;
       letter-spacing: 0.05em;
     }
@@ -109,13 +112,13 @@
 
     /* Nav buttons */
     .nav-bar {
-      display: flex; gap: 8px; margin-top: 8px;
+      display: flex; gap: 6px; margin-top: 6px;
       justify-content: center; flex-wrap: wrap;
     }
     .nav-btn {
       font-family: 'VT323', monospace;
-      font-size: 18px;
-      padding: 4px 16px;
+      font-size: clamp(14px, 4vw, 18px);
+      padding: 4px 10px;
       border: none; border-radius: 2px;
       cursor: pointer; transition: opacity 0.1s;
       letter-spacing: 0.05em;
@@ -130,10 +133,11 @@
 
     /* Remote */
     .remote-bar {
-      display: flex; align-items: center; gap: 12px;
-      margin-top: 6px; justify-content: center;
+      display: flex; align-items: center; gap: 8px;
+      margin-top: 4px; justify-content: center;
       font-family: 'Share Tech Mono', monospace;
-      font-size: 11px; color: #555; letter-spacing: 0.1em;
+      font-size: 10px; color: #555; letter-spacing: 0.05em;
+      flex-wrap: wrap;
     }
     .page-input {
       background: #000; color: var(--yellow);
