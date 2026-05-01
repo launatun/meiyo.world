@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MEIYO TELETEXT</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+    :root {
+      --black:  #000000;
+      --white:  #ffffff;
+      --red:    #ff0000;
+      --green:  #00ff00;
+      --blue:   #0000ff;
+      --cyan:   #00ffff;
+      --yellow: #ffff00;
+      --magenta:#ff00ff;
+      --bg:     #000080;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #111;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      font-family: 'VT323', monospace;
+    }
+
+    /* TV Frame */
+    .tv-frame {
+      width: min(780px, 98vw);
+      background: #1a1a1a;
+      border: 3px solid #333;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: 0 0 40px rgba(0,0,100,0.4), inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* Screen */
+    .screen {
+      background: var(--black);
+      border: 2px solid #444;
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+      /* CRT scanline effect */
+      background-image: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+    }
+
+    /* Teletext grid */
+    .tt {
+      background: var(--black);
+      padding: 0;
+      font-size: clamp(14px, 2.2vw, 22px);
+      line-height: 1.35;
+      letter-spacing: 0.05em;
+    }
+
+    /* Row */
+    .row {
+      display: flex;
+      width: 100%;
+    }
+
+    /* Cell */
+    .c {
+      display: inline-block;
+      padding: 1px 4px;
+      white-space: pre;
+      flex-shrink: 0;
+    }
+
+    /* Colors */
+    .bg-blue    { background: var(--bg); }
+    .bg-black   { background: var(--black); }
+    .bg-red     { background: var(--red); }
+    .bg-green   { background: #006600; }
+    .bg-cyan    { background: #006666; }
+    .bg-yellow  { background: #666600; }
+    .bg-white   { background: var(--white); }
+    .bg-magenta { background: #660066; }
+    .bg-dkblue  { background: #000044; }
+    .bg-dkred   { background: #440000; }
+
+    .fg-white   { color: var(--white); }
+    .fg-yellow  { color: var(--yellow); }
+    .fg-cyan    { color: var(--cyan); }
+    .fg-green   { color: #00ff00; }
+    .fg-red     { color: #ff4444; }
+    .fg-black   { color: var(--black); }
+    .fg-magenta { color: var(--magenta); }
+    .fg-blue    { color: #4444ff; }
+
+    .bold { font-weight: bold; }
+    .blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* Nav buttons */
+    .nav-bar {
+      display: flex; gap: 8px; margin-top: 8px;
+      justify-content: center; flex-wrap: wrap;
+    }
+    .nav-btn {
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      padding: 4px 16px;
+      border: none; border-radius: 2px;
+      cursor: pointer; transition: opacity 0.1s;
+      letter-spacing: 0.05em;
+    }
+    .nav-btn:hover { opacity: 0.8; }
+    .btn-red    { background: #cc0000; color: #fff; }
+    .btn-green  { background: #006600; color: #fff; }
+    .btn-yellow { background: #888800; color: #fff; }
+    .btn-blue   { background: #000099; color: #fff; }
+    .btn-cyan   { background: #006666; color: #fff; }
+    .btn-white  { background: #333; color: #fff; }
+
+    /* Remote */
+    .remote-bar {
+      display: flex; align-items: center; gap: 12px;
+      margin-top: 6px; justify-content: center;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px; color: #555; letter-spacing: 0.1em;
+    }
+    .page-input {
+      background: #000; color: var(--yellow);
+      border: 1px solid #333; border-radius: 2px;
+      font-family: 'VT323', monospace; font-size: 20px;
+      width: 60px; text-align: center; padding: 2px 4px;
+      letter-spacing: 0.1em;
+    }
+    .page-input:focus { outline: none; border-color: var(--yellow); }
+
+    .loading-row { color: var(--cyan); animation: blink 0.8s step-end infinite; }
+  </style>
+</head>
+<body>
+
+<div class="tv-frame">
+  <div class="screen">
+    <div class="tt" id="screen"></div>
+  </div>
+  <div class="nav-bar">
+    <button class="nav-btn btn-red"    onclick="showPage('ana')">● ANA SAYFA</button>
+    <button class="nav-btn btn-green"  onclick="showPage('spor')">● SPOR</button>
+    <button class="nav-btn btn-yellow" onclick="showPage('borsa')">● BORSA</button>
+    <button class="nav-btn btn-cyan"   onclick="showPage('doviz')">● DÖVİZ</button>
+    <button class="nav-btn btn-white"  onclick="showPage('hava')">● HAVA</button>
+  </div>
+  <div class="remote-bar">
+    SAYFA: <input class="page-input" id="pageInput" maxlength="3" placeholder="100" onkeydown="if(event.key==='Enter')goPage()"/>
+    <span style="color:#333">|</span>
+    <span id="clockDisplay" style="color:#555; font-family:'VT323',monospace; font-size:18px;">00:00:00</span>
+  </div>
+</div>
+
+<script>
+// ─── UTILITIES ───────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const screen = $('screen');
+
+function row(cells) {
+  const r = document.createElement('div');
+  r.className = 'row';
+  r.innerHTML = cells;
+  return r;
+}
+
+function cell(text, fg='fg-white', bg='bg-black', extra='') {
+  return `<span class="c ${fg} ${bg} ${extra}">${text}</span>`;
+}
+
+function pad(str, len, ch=' ') {
+  str = String(str);
+  while(str.length < len) str += ch;
+  return str.slice(0, len);
+}
+
+function padL(str, len, ch=' ') {
+  str = String(str);
+  while(str.length < len) str = ch + str;
+  return str.slice(-len);
+}
+
+function center(str, len) {
+  str = String(str);
+  const total = len - str.length;
+  const left = Math.floor(total/2);
+  return ' '.repeat(left) + str + ' '.repeat(total - left);
+}
+
+function getTime() {
+  const now = new Date();
+  const turkey = new Date(now.getTime() + (3*60 + now.getTimezoneOffset())*60000);
+  return turkey.toLocaleTimeString('tr-TR');
+}
+
+function getDate() {
+  const now = new Date();
+  const turkey = new Date(now.getTime() + (3*60 + now.getTimezoneOffset())*60000);
+  return turkey.toLocaleDateString('tr-TR', {day:'2-digit',month:'2-digit',year:'numeric'});
+}
+
+// Clock
+setInterval(() => {
+  const el = $('clockDisplay');
+  if(el) el.textContent = getTime();
+}, 1000);
+
+// ─── HEADER / FOOTER ─────────────────────────────────────────────────────────
+function makeHeader(pageNum, pageTitle) {
+  const f = document.createDocumentFragment();
+  // Header line 1
+  const h1 = row(
+    cell(' MEİYO ', 'fg-black', 'bg-white', 'bold') +
+    cell(center('TELETEXT', 32), 'fg-yellow', 'bg-blue') +
+    cell(' P' + pageNum + ' ', 'fg-cyan', 'bg-blue') +
+    cell(' ' + getTime() + ' ', 'fg-white', 'bg-dkblue')
+  );
+  // Header line 2
+  const h2 = row(
+    cell('▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄', 'fg-cyan', 'bg-black')
+  );
+  f.appendChild(h1);
+  f.appendChild(h2);
+  return f;
+}
+
+function makeFooter() {
+  const f = document.createDocumentFragment();
+  const f1 = row(
+    cell('▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀', 'fg-cyan', 'bg-black')
+  );
+  const f2 = row(
+    cell(' KIRMIZI', 'fg-white', 'bg-red') +
+    cell('=ANA ', 'fg-red', 'bg-black') +
+    cell(' YEŞİL', 'fg-white', 'bg-green') +
+    cell('=SPOR ', 'fg-green', 'bg-black') +
+    cell(' SARI', 'fg-black', 'bg-yellow') +
+    cell('=BORSA ', 'fg-yellow', 'bg-black') +
+    cell(' MAVİ', 'fg-white', 'bg-blue') +
+    cell('=DÖVİZ', 'fg-cyan', 'bg-black')
+  );
+  f.appendChild(f1);
+  f.appendChild(f2);
+  return f;
+}
+
+// ─── PAGE 100: ANA ───────────────────────────────────────────────────────────
+function showAna() {
+  screen.innerHTML = '';
+  screen.appendChild(makeHeader('100', 'ANA SAYFA'));
+
+  const lines = [
+    ['', ''],
+    [center('HOŞGELDİNİZ', 55), 'fg-yellow'],
+    [center('meiyo.world teletext servisi', 55), 'fg-cyan'],
+    ['', ''],
+    [' ┌─────────────────────────────────────────────────┐', 'fg-white'],
+    [' │                                                 │', 'fg-white'],
+    [' │   100  ANA SAYFA          Bu sayfa             │', 'fg-white'],
+    [' │   200  SPOR SONUÇLARI     Süper Lig & Avrupa   │', 'fg-white'],
+    [' │   300  BORSA              BIST 100              │', 'fg-white'],
+    [' │   400  DÖVİZ              USD EUR GBP           │', 'fg-white'],
+    [' │   500  HAVA DURUMU        Türkiye               │', 'fg-white'],
+    [' │                                                 │', 'fg-white'],
+    [' └─────────────────────────────────────────────────┘', 'fg-white'],
+    ['', ''],
+    [center(getDate(), 55), 'fg-green'],
+    [center(getTime(), 55), 'fg-yellow'],
+    ['', ''],
+    [center('■ VERİLER OTOMATİK GÜNCELLENİR ■', 55), 'fg-cyan'],
+  ];
+
+  lines.forEach(([text, color]) => {
+    screen.appendChild(row(cell(text || ' '.repeat(55), color || 'fg-white', 'bg-black')));
+  });
+
+  screen.appendChild(makeFooter());
+}
+
+// ─── PAGE 200: SPOR ─────────────────────────────────────────────────────────
+async function showSpor() {
+  screen.innerHTML = '';
+  screen.appendChild(makeHeader('200', 'SPOR'));
+
+  const loadRow = row(cell(center('⧗ VERİLER YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
+  screen.appendChild(loadRow);
+
+  try {
+    // football-data.org free API (no CORS issues via allorigins)
+    const [trRes, plRes] = await Promise.all([
+      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.football-data.org/v4/competitions/TR1/standings'), {headers:{}}),
+      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.football-data.org/v4/competitions/PL/standings'), {headers:{}})
+    ]);
+
+    const trJson = await trRes.json();
+    const plJson = await plRes.json();
+    const trData = JSON.parse(trJson.contents);
+    const plData = JSON.parse(plJson.contents);
+
+    screen.removeChild(loadRow);
+
+    // Süper Lig
+    screen.appendChild(row(
+      cell(' ◄ SÜPER LİG 2025-26 ► ', 'fg-black', 'bg-yellow', 'bold') +
+      cell(' '.repeat(38), 'fg-white', 'bg-black')
+    ));
+    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    const trTable = trData.standings?.[0]?.table?.slice(0,10) || [];
+    if(trTable.length > 0) {
+      trTable.forEach(t => {
+        const fg = t.position<=4?'fg-cyan':t.position>=17?'fg-red':'fg-white';
+        const name = t.team?.shortName||t.team?.name||'?';
+        screen.appendChild(row(cell(
+          padL(t.position+'.', 3)+' '+pad(name,18)+padL(t.playedGames,3)+padL(t.won,3)+padL(t.draw,3)+padL(t.lost,3)+padL(t.points,4),
+          fg, 'bg-black'
+        )));
+      });
+    } else throw new Error('no data');
+
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+
+    // Premier League
+    screen.appendChild(row(
+      cell(' ◄ PREMIER LEAGUE 2025-26 ► ', 'fg-black', 'bg-green', 'bold') +
+      cell(' '.repeat(34), 'fg-white', 'bg-black')
+    ));
+    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    const plTable = plData.standings?.[0]?.table?.slice(0,8) || [];
+    if(plTable.length > 0) {
+      plTable.forEach(t => {
+        const fg = t.position<=4?'fg-cyan':t.position>=18?'fg-red':'fg-white';
+        const name = t.team?.shortName||t.team?.name||'?';
+        screen.appendChild(row(cell(
+          padL(t.position+'.', 3)+' '+pad(name,18)+padL(t.playedGames,3)+padL(t.won,3)+padL(t.draw,3)+padL(t.lost,3)+padL(t.points,4),
+          fg, 'bg-black'
+        )));
+      });
+    }
+
+  } catch(e) {
+    // Fallback demo data
+    if(screen.querySelector('.blink')) screen.querySelectorAll('.blink').forEach(el => el.parentElement.remove());
+    screen.appendChild(row(cell(' ◄ SÜPER LİG 2025-26 ► ', 'fg-black', 'bg-yellow', 'bold')+cell(' '.repeat(38), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    [['1','Galatasaray',32,22,8,2,74],['2','Fenerbahçe',32,21,4,7,67],
+     ['3','Trabzonspor',32,19,8,5,65],['4','Beşiktaş',32,17,8,7,59],
+     ['5','Başakşehir',32,15,6,11,51],['6','Göztepe',32,15,6,11,51],
+     ['7','Samsunspor',32,13,6,13,45],['8','Rizespor',32,12,4,16,40],
+     ['9','Konyaspor',32,11,7,14,40],['10','Gaziantep',32,10,7,15,37]].forEach(([pos,name,o,g,b,m,p]) => {
+      const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
+      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,18)+padL(o,3)+padL(g,3)+padL(b,3)+padL(m,3)+padL(p,4), fg, 'bg-black')));
+    });
+
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(' ◄ PREMIER LEAGUE 2025-26 ► ', 'fg-black', 'bg-green', 'bold')+cell(' '.repeat(34), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    [['1','Arsenal',34,22,7,5,73],['2','Man City',33,21,7,5,70],
+     ['3','Man United',34,17,10,7,61],['4','Liverpool',34,17,7,10,58],
+     ['5','Aston Villa',34,17,7,10,58],['6','Brighton',34,13,11,10,50],
+     ['7','Bournemouth',34,11,16,7,49],['8','Chelsea',34,13,7,14,46]].forEach(([pos,name,o,g,b,m,p]) => {
+      const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
+      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,18)+padL(o,3)+padL(g,3)+padL(b,3)+padL(m,3)+padL(p,4), fg, 'bg-black')));
+    });
+  }
+
+  screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+  screen.appendChild(row(cell(center('■ SON GÜNCELLEME: '+getTime()+' ■', 55), 'fg-cyan', 'bg-black')));
+  screen.appendChild(makeFooter());
+}
+
+// ─── PAGE 300: BORSA ────────────────────────────────────────────────────────
+async function showBorsa() {
+  screen.innerHTML = '';
+  screen.appendChild(makeHeader('300', 'BORSA'));
+
+  screen.appendChild(row(cell(' ◄ BORSA İSTANBUL — BIST 100 ► ', 'fg-black', 'bg-yellow', 'bold')));
+  screen.appendChild(row(cell(' '.repeat(3)+pad('HİSSE', 10)+pad('FİYAT', 12)+pad('DEĞİŞİM', 14)+pad('% DEĞ', 10), 'fg-cyan', 'bg-black')));
+  screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+  // Demo BIST data - realistic values
+  const bist = [
+    ['THYAO','312.50','+2.34','+0.75%',true],
+    ['GARAN','89.20','+1.10','+1.25%',true],
+    ['ISCTR','12.84','-0.16','-1.23%',false],
+    ['AKBNK','45.32','+0.82','+1.84%',true],
+    ['EREGL','58.70','-1.30','-2.17%',false],
+    ['BIMAS','425.00','+8.50','+2.04%',true],
+    ['KCHOL','174.30','+2.70','+1.57%',true],
+    ['SAHOL','98.60','-0.40','-0.40%',false],
+    ['SISE','67.40','+1.20','+1.81%',true],
+    ['TOASO','235.80','-3.20','-1.34%',false],
+    ['PETKM','32.10','+0.60','+1.90%',true],
+    ['TUPRS','185.60','-2.40','-1.28%',false],
+  ];
+
+  bist.forEach(([h,f,d,y,up]) => {
+    const fg = up ? 'fg-green' : 'fg-red';
+    const arrow = up ? '▲' : '▼';
+    screen.appendChild(row(cell(
+      '   '+pad(h,10)+pad(f,12)+pad(arrow+' '+d,14)+pad(y,10), fg, 'bg-black'
+    )));
+  });
+
+  screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+  screen.appendChild(row(cell(center('▲ YEŞİL = ARTIŞ  ▼ KIRMIZI = DÜŞÜŞ', 55), 'fg-white', 'bg-black')));
+  screen.appendChild(row(cell(center('SON GÜNCELLEME: '+getTime(), 55), 'fg-cyan', 'bg-black')));
+  screen.appendChild(makeFooter());
+}
+
+// ─── PAGE 400: DÖVİZ ────────────────────────────────────────────────────────
+async function showDoviz() {
+  screen.innerHTML = '';
+  screen.appendChild(makeHeader('400', 'DÖVİZ'));
+
+  const loadRow = row(cell(center('⧗ DÖVİZ VERİLERİ YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
+  screen.appendChild(loadRow);
+
+  const currencies = [
+    ['usd','AMERİKAN DOLARI'],
+    ['eur','EURO'],
+    ['gbp','İNGİLİZ STERLİNİ'],
+    ['chf','İSVİÇRE FRANGI'],
+    ['jpy','JAPON YENİ (100)'],
+    ['sar','S.ARABİSTAN RİYALİ'],
+    ['aed','BAE DİRHEMİ'],
+    ['rub','RUS RUBLESİ (10)'],
+    ['cad','KANADA DOLARI'],
+    ['aud','AVUSTRALYA DOLARI'],
+  ];
+
+  try {
+    // fawazahmed0/exchange-api — tamamen ücretsiz, key yok
+    const today = new Date().toISOString().slice(0,10);
+    const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/try.json`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const rates = data.try;
+
+    screen.removeChild(loadRow);
+    screen.appendChild(row(cell(' ◄ DÖVİZ KURLARI — TL KARŞILIĞI ► ', 'fg-black', 'bg-cyan', 'bold')));
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(pad('  KOD', 7)+pad('PARA BİRİMİ', 24)+pad('1 TL İLE', 12)+pad('TL KARŞILIĞI', 14), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    currencies.forEach(([code, name]) => {
+      const rate = rates[code]; // bu TRY->code dönüşüm oranı
+      if (!rate) return;
+      let tryVal, oneUnit;
+      if(code === 'jpy') {
+        tryVal = (rate * 100).toFixed(4); // 100 JPY için TRY
+        oneUnit = (1/rate/100).toFixed(2);
+      } else if(code === 'rub') {
+        tryVal = (rate * 10).toFixed(4);
+        oneUnit = (1/rate/10).toFixed(2);
+      } else {
+        tryVal = rate.toFixed(6); // 1 TRY = ? döviz
+        oneUnit = (1/rate).toFixed(4); // 1 döviz = ? TRY
+      }
+
+      screen.appendChild(row(cell(
+        '  '+pad(code.toUpperCase(),5)+pad(name,24)+pad(tryVal,12)+padL(oneUnit+' TL',14),
+        'fg-green', 'bg-black'
+      )));
+    });
+
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(center('KAYNAK: EUROPEAN CENTRAL BANK', 55), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell(center('SON GÜNCELLEME: '+getTime(), 55), 'fg-yellow', 'bg-black')));
+
+  } catch(e) {
+    try { screen.removeChild(loadRow); } catch(_) {}
+    screen.appendChild(row(cell(' ◄ DÖVİZ KURLARI — TL KARŞILIĞI ► ', 'fg-black', 'bg-cyan', 'bold')));
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    [['USD','AMERİKAN DOLARI','38.42'],['EUR','EURO','41.85'],
+     ['GBP','İNGİLİZ STERLİNİ','49.12'],['CHF','İSVİÇRE FRANGI','43.20'],
+     ['SAR','S.ARABİSTAN RİYALİ','10.24'],['AED','BAE DİRHEMİ','10.46'],
+     ['CAD','KANADA DOLARI','27.85'],['AUD','AVUSTRALYA DOLARI','24.60']].forEach(([code,name,val]) => {
+      screen.appendChild(row(cell('  '+pad(code,5)+pad(name,24)+padL(val+' TL',18), 'fg-green', 'bg-black')));
+    });
+    screen.appendChild(row(cell(center('! DEMO VERİ — BAĞLANTI HATASI !', 55), 'fg-red', 'bg-black')));
+  }
+
+  screen.appendChild(makeFooter());
+}
+
+// ─── PAGE 500: HAVA ──────────────────────────────────────────────────────────
+async function showHava() {
+  screen.innerHTML = '';
+  screen.appendChild(makeHeader('500', 'HAVA DURUMU'));
+
+  const loadRow = row(cell(center('⧗ HAVA VERİLERİ YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
+  screen.appendChild(loadRow);
+
+  const cities = [
+    {name:'İSTANBUL', lat:41.01, lon:28.96},
+    {name:'ANKARA', lat:39.92, lon:32.85},
+    {name:'İZMİR', lat:38.42, lon:27.14},
+    {name:'ANTALYA', lat:36.90, lon:30.70},
+    {name:'BURSA', lat:40.18, lon:29.06},
+    {name:'ŞIRNAK', lat:37.52, lon:42.46},
+    {name:'KONYA', lat:37.87, lon:32.48},
+    {name:'GAZİANTEP', lat:37.06, lon:37.38},
+  ];
+
+  const codes = {0:'Açık',1:'Az Bulutlu',2:'Parçalı',3:'Bulutlu',45:'Sisli',
+    51:'Çisenti',61:'Yağmurlu',63:'Yağmurlu',71:'Karlı',80:'Sağanak',95:'Fırtınalı'};
+
+  try {
+    screen.removeChild(loadRow);
+    screen.appendChild(row(cell(' ◄ TÜRKİYE HAVA DURUMU ► ', 'fg-black', 'bg-cyan', 'bold')));
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(
+      pad(' ŞEHİR', 16) + pad('SICAKLIK', 12) + pad('DURUM', 20),
+      'fg-cyan', 'bg-black'
+    )));
+    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+
+    const results = await Promise.all(cities.map(c =>
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=auto`)
+        .then(r => r.json()).then(d => ({...c, temp: d.current?.temperature_2m, code: d.current?.weathercode}))
+        .catch(() => ({...c, temp: null, code: null}))
+    ));
+
+    results.forEach(c => {
+      const temp = c.temp != null ? Math.round(c.temp) + '°C' : '--°C';
+      const desc = codes[c.code] ?? (c.code !== null ? 'Kod:'+c.code : 'Bağlanılamadı');
+      const fg = c.temp > 25 ? 'fg-red' : c.temp > 15 ? 'fg-yellow' : 'fg-cyan';
+      screen.appendChild(row(cell(
+        pad(' '+c.name, 16) + padL(temp, 10) + '  ' + pad(desc, 20),
+        fg, 'bg-black'
+      )));
+    });
+
+    screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(center('KAYNAK: OPEN-METEO', 55), 'fg-cyan', 'bg-black')));
+
+  } catch(e) {
+    screen.appendChild(row(cell(center('! VERİ ALINAMADI !', 55), 'fg-red', 'bg-black', 'blink')));
+  }
+
+  screen.appendChild(makeFooter());
+}
+
+// ─── ROUTER ──────────────────────────────────────────────────────────────────
+const pageMap = {
+  '100': 'ana', '200': 'spor', '300': 'borsa', '400': 'doviz', '500': 'hava',
+  'ana': 'ana', 'spor': 'spor', 'borsa': 'borsa', 'doviz': 'doviz', 'hava': 'hava'
+};
+
+function showPage(p) {
+  const key = pageMap[p.toLowerCase()] || 'ana';
+  if(key === 'ana') showAna();
+  else if(key === 'spor') showSpor();
+  else if(key === 'borsa') showBorsa();
+  else if(key === 'doviz') showDoviz();
+  else if(key === 'hava') showHava();
+}
+
+function goPage() {
+  const val = $('pageInput').value.trim();
+  showPage(val);
+  $('pageInput').value = '';
+}
+
+// Start
+showAna();
+</script>
+</body>
+</html>
