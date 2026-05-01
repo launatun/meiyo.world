@@ -359,12 +359,19 @@
     function closeOnBg(e) {
       if (e.target === document.getElementById('secretModal')) closeSecret();
     }
-    function checkSecret() {
+    const _h1 = 'd20bdc364b3d7dfdcd81be5a3fd192d0f513fa79e92463bf0ed9efd2f46c243b';
+    const _h2 = '656d5be9b84397105deefd04cb2e83f4f3d448bccfaa953d6f62021b50f6488a';
+    async function checkSecret() {
       const val = document.getElementById('secretField').value;
       const field = document.getElementById('secretField');
       const err = document.getElementById('secretError');
-      if (val === '0411') {
+      const enc = new TextEncoder().encode(val);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      if (hash === _h1) {
         window.location.href = '/eda';
+      } else if (hash === _h2) {
+        window.location.href = '/tayfun31';
       } else {
         field.classList.add('error');
         err.textContent = 'Bilmiyosan deneme ya';
