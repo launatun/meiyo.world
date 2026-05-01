@@ -427,12 +427,10 @@
 
     async function incrementAndGetCount() {
       try {
-        // Read current count
         const res = await fetch(`${DB_URL}/visitors.json`);
         const data = await res.json();
-        const current = data || 0;
+        const current = (typeof data === 'number') ? data : 0;
         const newCount = current + 1;
-        // Write new count
         await fetch(`${DB_URL}/visitors.json`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
