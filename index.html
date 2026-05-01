@@ -368,10 +368,11 @@
       const enc = new TextEncoder().encode(val);
       const buf = await crypto.subtle.digest('SHA-256', enc);
       const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+      const _d = (s) => atob(s);
       if (hash === _h1) {
-        window.location.href = '/eda';
+        window.location.href = _d('L2VkYQ==');
       } else if (hash === _h2) {
-        window.location.href = '/tayfun31';
+        window.location.href = _d('L3RheWZ1bjMx');
       } else {
         field.classList.add('error');
         err.textContent = 'Bilmiyosan deneme ya';
