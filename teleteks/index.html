@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>MEIYO TELETEXT</title>
+  <title>Meiyotext</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
 
@@ -218,6 +218,8 @@ function getDate() {
 setInterval(() => {
   const el = $('clockDisplay');
   if(el) el.textContent = getTime();
+  const hClock = document.getElementById('headerClock');
+  if(hClock) hClock.textContent = getTime();
 }, 1000);
 
 // ─── HEADER / FOOTER ─────────────────────────────────────────────────────────
@@ -228,7 +230,7 @@ function makeHeader(pageNum, pageTitle) {
     cell(' MEİYO ', 'fg-black', 'bg-white', 'bold') +
     cell(center('TELETEXT', 32), 'fg-yellow', 'bg-blue') +
     cell(' P' + pageNum + ' ', 'fg-cyan', 'bg-blue') +
-    cell(' ' + getTime() + ' ', 'fg-white', 'bg-dkblue')
+    cell('<span id="headerClock">' + getTime() + '</span>', 'fg-white', 'bg-dkblue')
   );
   // Header line 2
   const h2 = row(
@@ -241,21 +243,8 @@ function makeHeader(pageNum, pageTitle) {
 
 function makeFooter() {
   const f = document.createDocumentFragment();
-  const f1 = row(
-    cell('=' .repeat(55), 'fg-cyan', 'bg-black')
-  );
-  const f2 = row(
-    cell(' KIRMIZI', 'fg-white', 'bg-red') +
-    cell('=ANA ', 'fg-red', 'bg-black') +
-    cell(' YEŞİL', 'fg-white', 'bg-green') +
-    cell('=SPOR ', 'fg-green', 'bg-black') +
-    cell(' SARI', 'fg-black', 'bg-yellow') +
-    cell('=BORSA ', 'fg-yellow', 'bg-black') +
-    cell(' MAVİ', 'fg-white', 'bg-blue') +
-    cell('=DÖVİZ', 'fg-cyan', 'bg-black')
-  );
+  const f1 = row(cell('=' .repeat(55), 'fg-cyan', 'bg-black'));
   f.appendChild(f1);
-  f.appendChild(f2);
   return f;
 }
 
