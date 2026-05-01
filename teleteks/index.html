@@ -232,7 +232,7 @@ function makeHeader(pageNum, pageTitle) {
   );
   // Header line 2
   const h2 = row(
-    cell('▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄', 'fg-cyan', 'bg-black')
+    cell('=' .repeat(55), 'fg-cyan', 'bg-black')
   );
   f.appendChild(h1);
   f.appendChild(h2);
@@ -242,7 +242,7 @@ function makeHeader(pageNum, pageTitle) {
 function makeFooter() {
   const f = document.createDocumentFragment();
   const f1 = row(
-    cell('▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀', 'fg-cyan', 'bg-black')
+    cell('=' .repeat(55), 'fg-cyan', 'bg-black')
   );
   const f2 = row(
     cell(' KIRMIZI', 'fg-white', 'bg-red') +
@@ -269,15 +269,13 @@ function showAna() {
     [center('HOŞGELDİNİZ', 55), 'fg-yellow'],
     [center('meiyo.world teletext servisi', 55), 'fg-cyan'],
     ['', ''],
-    [' ┌─────────────────────────────────────────────────┐', 'fg-white'],
-    [' │                                                 │', 'fg-white'],
-    [' │   100  ANA SAYFA          Bu sayfa             │', 'fg-white'],
-    [' │   200  SPOR SONUÇLARI     Süper Lig & Avrupa   │', 'fg-white'],
-    [' │   300  BORSA              BIST 100              │', 'fg-white'],
-    [' │   400  DÖVİZ              USD EUR GBP           │', 'fg-white'],
-    [' │   500  HAVA DURUMU        Türkiye               │', 'fg-white'],
-    [' │                                                 │', 'fg-white'],
-    [' └─────────────────────────────────────────────────┘', 'fg-white'],
+    ['', ''],
+    ['   100   ANA SAYFA', 'fg-yellow'],
+    ['   200   SPOR SONUCLARI     Super Lig & Avrupa', 'fg-white'],
+    ['   300   BORSA              BIST 100', 'fg-white'],
+    ['   400   DOVIZ              USD EUR GBP', 'fg-white'],
+    ['   500   HAVA DURUMU        Turkiye', 'fg-white'],
+    ['', ''],
     ['', ''],
     [center(getDate(), 55), 'fg-green'],
     [center(getTime(), 55), 'fg-yellow'],
@@ -319,8 +317,8 @@ async function showSpor() {
       cell(' ◄ SÜPER LİG 2025-26 ► ', 'fg-black', 'bg-yellow', 'bold') +
       cell(' '.repeat(38), 'fg-white', 'bg-black')
     ));
-    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     const trTable = trData.standings?.[0]?.table?.slice(0,10) || [];
     if(trTable.length > 0) {
@@ -328,7 +326,7 @@ async function showSpor() {
         const fg = t.position<=4?'fg-cyan':t.position>=17?'fg-red':'fg-white';
         const name = t.team?.shortName||t.team?.name||'?';
         screen.appendChild(row(cell(
-          padL(t.position+'.', 3)+' '+pad(name,18)+padL(t.playedGames,3)+padL(t.won,3)+padL(t.draw,3)+padL(t.lost,3)+padL(t.points,4),
+          padL(t.position+'.',3)+' '+pad(name,16)+padL(t.playedGames,4)+padL(t.won,4)+padL(t.draw,4)+padL(t.lost,4)+padL(t.points,5),
           fg, 'bg-black'
         )));
       });
@@ -341,8 +339,8 @@ async function showSpor() {
       cell(' ◄ PREMIER LEAGUE 2025-26 ► ', 'fg-black', 'bg-green', 'bold') +
       cell(' '.repeat(34), 'fg-white', 'bg-black')
     ));
-    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     const plTable = plData.standings?.[0]?.table?.slice(0,8) || [];
     if(plTable.length > 0) {
@@ -350,7 +348,7 @@ async function showSpor() {
         const fg = t.position<=4?'fg-cyan':t.position>=18?'fg-red':'fg-white';
         const name = t.team?.shortName||t.team?.name||'?';
         screen.appendChild(row(cell(
-          padL(t.position+'.', 3)+' '+pad(name,18)+padL(t.playedGames,3)+padL(t.won,3)+padL(t.draw,3)+padL(t.lost,3)+padL(t.points,4),
+          padL(t.position+'.',3)+' '+pad(name,16)+padL(t.playedGames,4)+padL(t.won,4)+padL(t.draw,4)+padL(t.lost,4)+padL(t.points,5),
           fg, 'bg-black'
         )));
       });
@@ -360,8 +358,8 @@ async function showSpor() {
     // Fallback demo data
     if(screen.querySelector('.blink')) screen.querySelectorAll('.blink').forEach(el => el.parentElement.remove());
     screen.appendChild(row(cell(' ◄ SÜPER LİG 2025-26 ► ', 'fg-black', 'bg-yellow', 'bold')+cell(' '.repeat(38), 'fg-white', 'bg-black')));
-    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     [['1','Galatasaray',32,22,8,2,74],['2','Fenerbahçe',32,21,4,7,67],
      ['3','Trabzonspor',32,19,8,5,65],['4','Beşiktaş',32,17,8,7,59],
@@ -369,20 +367,20 @@ async function showSpor() {
      ['7','Samsunspor',32,13,6,13,45],['8','Rizespor',32,12,4,16,40],
      ['9','Konyaspor',32,11,7,14,40],['10','Gaziantep',32,10,7,15,37]].forEach(([pos,name,o,g,b,m,p]) => {
       const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
-      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,18)+padL(o,3)+padL(g,3)+padL(b,3)+padL(m,3)+padL(p,4), fg, 'bg-black')));
+      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,16)+padL(o,4)+padL(g,4)+padL(b,4)+padL(m,4)+padL(p,5), fg, 'bg-black')));
     });
 
     screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
     screen.appendChild(row(cell(' ◄ PREMIER LEAGUE 2025-26 ► ', 'fg-black', 'bg-green', 'bold')+cell(' '.repeat(34), 'fg-white', 'bg-black')));
-    screen.appendChild(row(cell(pad(' #  TAKIM', 22)+pad('O',3)+pad('G',3)+pad('B',3)+pad('M',3)+pad('P',4), 'fg-cyan', 'bg-black')));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     [['1','Arsenal',34,22,7,5,73],['2','Man City',33,21,7,5,70],
      ['3','Man United',34,17,10,7,61],['4','Liverpool',34,17,7,10,58],
      ['5','Aston Villa',34,17,7,10,58],['6','Brighton',34,13,11,10,50],
      ['7','Bournemouth',34,11,16,7,49],['8','Chelsea',34,13,7,14,46]].forEach(([pos,name,o,g,b,m,p]) => {
       const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
-      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,18)+padL(o,3)+padL(g,3)+padL(b,3)+padL(m,3)+padL(p,4), fg, 'bg-black')));
+      screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,16)+padL(o,4)+padL(g,4)+padL(b,4)+padL(m,4)+padL(p,5), fg, 'bg-black')));
     });
   }
 
@@ -398,7 +396,7 @@ async function showBorsa() {
 
   screen.appendChild(row(cell(' ◄ BORSA İSTANBUL — BIST 100 ► ', 'fg-black', 'bg-yellow', 'bold')));
   screen.appendChild(row(cell(' '.repeat(3)+pad('HİSSE', 10)+pad('FİYAT', 12)+pad('DEĞİŞİM', 14)+pad('% DEĞ', 10), 'fg-cyan', 'bg-black')));
-  screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+  screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
   // Demo BIST data - realistic values
   const bist = [
@@ -463,7 +461,7 @@ async function showDoviz() {
     screen.appendChild(row(cell(' ◄ DÖVİZ KURLARI — TL KARŞILIĞI ► ', 'fg-black', 'bg-cyan', 'bold')));
     screen.appendChild(row(cell(' ', 'fg-white', 'bg-black')));
     screen.appendChild(row(cell(pad('  KOD', 7)+pad('PARA BİRİMİ', 24)+pad('1 TL İLE', 12)+pad('TL KARŞILIĞI', 14), 'fg-cyan', 'bg-black')));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     currencies.forEach(([code, name]) => {
       const rate = rates[code]; // bu TRY->code dönüşüm oranı
@@ -536,7 +534,7 @@ async function showHava() {
       pad(' ŞEHİR', 16) + pad('SICAKLIK', 12) + pad('DURUM', 20),
       'fg-cyan', 'bg-black'
     )));
-    screen.appendChild(row(cell('─'.repeat(55), 'fg-white', 'bg-black')));
+    screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     const results = await Promise.all(cities.map(c =>
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lon}&current=temperature_2m,weathercode&timezone=auto`)
