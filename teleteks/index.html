@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Meiyotext</title>
+  <title>Meiyo TELETEXT</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
 
@@ -375,10 +375,10 @@ async function showSpor() {
     screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
     screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
-    const trTable = trData.standings?.[0]?.table?.slice(0,10) || [];
+    const trTable = trData.standings?.[0]?.table?.slice(0,5) || [];
     if(trTable.length > 0) {
       trTable.forEach(t => {
-        const fg = t.position<=4?'fg-cyan':t.position>=17?'fg-red':'fg-white';
+        const fg = t.position===1?'fg-cyan':'fg-white';
         const name = t.team?.shortName||t.team?.name||'?';
         screen.appendChild(row(cell(
           padL(t.position+'.',3)+' '+pad(name,16)+padL(t.playedGames,4)+padL(t.won,4)+padL(t.draw,4)+padL(t.lost,4)+padL(t.points,5),
@@ -397,7 +397,7 @@ async function showSpor() {
     screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
     screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
-    const plTable = plData.standings?.[0]?.table?.slice(0,8) || [];
+    const plTable = plData.standings?.[0]?.table?.slice(0,5) || [];
     if(plTable.length > 0) {
       plTable.forEach(t => {
         const fg = t.position<=4?'fg-cyan':t.position>=18?'fg-red':'fg-white';
@@ -411,17 +411,16 @@ async function showSpor() {
 
   } catch(e) {
     // Fallback demo data
-    if(screen.querySelector('.blink')) screen.querySelectorAll('.blink').forEach(el => el.parentElement.remove());
+    screen.innerHTML = '';
+    screen.appendChild(makeHeader('200', 'SPOR'));
     screen.appendChild(row(cell(' ◄ SÜPER LİG 2025-26 ► ', 'fg-black', 'bg-yellow', 'bold')+cell(' '.repeat(38), 'fg-white', 'bg-black')));
     screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
     screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
     [['1','Galatasaray',32,22,8,2,74],['2','Fenerbahçe',32,21,4,7,67],
      ['3','Trabzonspor',32,19,8,5,65],['4','Beşiktaş',32,17,8,7,59],
-     ['5','Başakşehir',32,15,6,11,51],['6','Göztepe',32,15,6,11,51],
-     ['7','Samsunspor',32,13,6,13,45],['8','Rizespor',32,12,4,16,40],
-     ['9','Konyaspor',32,11,7,14,40],['10','Gaziantep',32,10,7,15,37]].forEach(([pos,name,o,g,b,m,p]) => {
-      const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
+     ['5','Başakşehir',32,15,6,11,51]].forEach(([pos,name,o,g,b,m,p]) => {
+      const fg = parseInt(pos)===1?'fg-cyan':'fg-white';
       screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,16)+padL(o,4)+padL(g,4)+padL(b,4)+padL(m,4)+padL(p,5), fg, 'bg-black')));
     });
 
@@ -432,9 +431,8 @@ async function showSpor() {
 
     [['1','Arsenal',34,22,7,5,73],['2','Man City',33,21,7,5,70],
      ['3','Man United',34,17,10,7,61],['4','Liverpool',34,17,7,10,58],
-     ['5','Aston Villa',34,17,7,10,58],['6','Brighton',34,13,11,10,50],
-     ['7','Bournemouth',34,11,16,7,49],['8','Chelsea',34,13,7,14,46]].forEach(([pos,name,o,g,b,m,p]) => {
-      const fg = parseInt(pos)<=4?'fg-cyan':'fg-white';
+     ['5','Aston Villa',34,17,7,10,58]].forEach(([pos,name,o,g,b,m,p]) => {
+      const fg = parseInt(pos)===1?'fg-cyan':'fg-white';
       screen.appendChild(row(cell(padL(pos+'.',3)+' '+pad(name,16)+padL(o,4)+padL(g,4)+padL(b,4)+padL(m,4)+padL(p,5), fg, 'bg-black')));
     });
   }
