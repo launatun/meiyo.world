@@ -164,6 +164,38 @@
       25% { transform: translateX(-6px); }
       75% { transform: translateX(6px); }
     }
+
+    /* Visitor counter */
+    .visitor-counter {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 2rem;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      animation: fadeUp 1s 2s forwards;
+    }
+    .visitor-dot {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.4); }
+    }
+    .visitor-text {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+    }
+    .visitor-text span {
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -271,6 +303,12 @@
       <div class="footer-right">© 2026 meiyo.world</div>
     </footer>
 
+
+  <!-- Visitor counter -->
+  <div class="visitor-counter">
+    <div class="visitor-dot"></div>
+    <div class="visitor-text">Ziyaretçi: <span id="visitorCount">—</span></div>
+  </div>
 
   <!-- Secret modal -->
   <div class="secret-modal" id="secretModal" onclick="closeOnBg(event)">
@@ -383,6 +421,29 @@
       if (e.key === 'Enter') checkSecret();
       if (e.key === 'Escape') closeSecret();
     });
+
+    // Firebase visitor counter
+    const DB_URL = 'https://meiyo-world-default-rtdb.europe-west1.firebasedatabase.app';
+
+    async function incrementAndGetCount() {
+      try {
+        // Read current count
+        const res = await fetch(`${DB_URL}/visitors.json`);
+        const data = await res.json();
+        const current = data || 0;
+        const newCount = current + 1;
+        // Write new count
+        await fetch(`${DB_URL}/visitors.json`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCount)
+        });
+        document.getElementById('visitorCount').textContent = newCount.toLocaleString('tr-TR');
+      } catch(e) {
+        document.getElementById('visitorCount').textContent = '—';
+      }
+    }
+    incrementAndGetCount();
   </script>
 </body>
 </html>
