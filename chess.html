@@ -304,6 +304,7 @@
         <button class="action-btn" onclick="goToDiffScreen()">YENİ OYUN</button>
         <button class="action-btn" onclick="undoMove()">GERİ AL</button>
         <button class="action-btn" onclick="toggleFlip()">ÇEVİR</button>
+        <button class="action-btn" id="toggleViewBtn" onclick="toggleView()">3D</button>
       </div>
       <div class="top-right">
         <div class="captured-row">
@@ -825,15 +826,16 @@ function render() {
   if(gameOver) status='Oyun bitti.';
   else if(turn==='w') status=inCheck?'⚠ ŞAH! — SENİN SIRAN':'Senin sıran — BEYAZ';
   else status='Bilgisayar düşünüyor...';
-  const stEl=document.getElementById('statusText'); stEl.textContent=status; stEl.className='status-turn'+(inCheck?' check':'');
-  document.getElementById('moveCount').textContent='Hamle: '+Math.floor(history.length/2);
+  const stEl=document.getElementById('statusText'); if(stEl){stEl.textContent=status; stEl.className='status-turn'+(inCheck?' check':'');}
+  const mcEl=document.getElementById('moveCount'); if(mcEl) mcEl.textContent='Hamle: '+Math.floor(history.length/2);
 
   // Captured
-  document.getElementById('capturedW').textContent=capturedW.map(p=>PIECE_SYMBOLS[p]).join('');
-  document.getElementById('capturedB').textContent=capturedB.map(p=>PIECE_SYMBOLS[p]).join('');
+  const cwEl=document.getElementById('capturedW'); if(cwEl) cwEl.textContent=capturedW.map(p=>PIECE_SYMBOLS[p]).join('');
+  const cbEl=document.getElementById('capturedB'); if(cbEl) cbEl.textContent=capturedB.map(p=>PIECE_SYMBOLS[p]).join('');
 
   // Move log
   const ml=document.getElementById('moveLog');
+  if(!ml) return;
   ml.innerHTML='';
   history.forEach((h,i)=>{
     const chip=document.createElement('span');
@@ -858,6 +860,374 @@ function goToDiffScreen() {
 // Init
 difficulty=1; flipped=false;
 // Don't auto-start, wait for difficulty selection
+
+
+// ─── 3D MODE ────────────────────────────────────────────────────────────────
+let is3D = false;
+let threeReady = false;
+let threeRenderer, threeScene, threeCamera, threeControls;
+let boardMeshes = [], pieceMeshes = {}, selectedMesh = null;
+let autoRotate = true;
+let THREE_lib = null;
+
+function toggleView() {
+  if (!is3D) {
+    document.getElementById('toggleViewBtn').textContent = '2D';
+    document.getElementById('canvas3d').style.display = 'block';
+    document.getElementById('ui3d').style.display = 'block';
+    document.getElementById('hint3d').style.display = 'block';
+    document.querySelector('.game-page').style.display = 'none';
+    is3D = true;
+    if (!threeReady) init3D();
+    else update3DBoard();
+  } else {
+    document.getElementById('toggleViewBtn').textContent = '3D';
+    document.getElementById('canvas3d').style.display = 'none';
+    document.getElementById('ui3d').style.display = 'none';
+    document.getElementById('hint3d').style.display = 'none';
+    document.querySelector('.game-page').style.display = 'flex';
+    is3D = false;
+    if (threeRenderer) threeRenderer.setAnimationLoop(null);
+  }
+}
+
+function init3D() {
+  const script = document.createElement('script');
+  script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+  script.onload = () => { THREE_lib = THREE; setup3DScene(); };
+  document.head.appendChild(script);
+}
+
+function setup3DScene() {
+  const T = THREE_lib;
+  const container = document.getElementById('canvas3d');
+
+  threeRenderer = new T.WebGLRenderer({ antialias: true, alpha: false });
+  threeRenderer.setSize(window.innerWidth, window.innerHeight);
+  threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  threeRenderer.shadowMap.enabled = true;
+  threeRenderer.shadowMap.type = T.PCFSoftShadowMap;
+  threeRenderer.setClearColor(0x0d0d0d);
+  container.appendChild(threeRenderer.domElement);
+
+  threeScene = new T.Scene();
+
+  // Fog
+  threeScene.fog = new T.FogExp2(0x0d0d0d, 0.035);
+
+  // Camera
+  threeCamera = new T.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+  threeCamera.position.set(0, 12, 12);
+  threeCamera.lookAt(0, 0, 0);
+
+  // Lights
+  const ambient = new T.AmbientLight(0xc9b99a, 0.4);
+  threeScene.add(ambient);
+
+  const dirLight = new T.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(5, 15, 5);
+  dirLight.castShadow = true;
+  dirLight.shadow.mapSize.width = 2048;
+  dirLight.shadow.mapSize.height = 2048;
+  threeScene.add(dirLight);
+
+  const rimLight = new T.DirectionalLight(0x3a2a6e, 0.5);
+  rimLight.position.set(-5, 5, -5);
+  threeScene.add(rimLight);
+
+  // Point lights for atmosphere
+  const pl1 = new T.PointLight(0xc9b99a, 0.6, 20);
+  pl1.position.set(0, 8, 0);
+  threeScene.add(pl1);
+
+  // Board
+  build3DBoard(T);
+  build3DPieces(T);
+
+  // Mouse controls
+  let isDragging = false, prevMouse = {x:0, y:0};
+  let phi = Math.PI/4, theta = Math.PI/4, radius = 18;
+
+  function updateCamera() {
+    threeCamera.position.x = radius * Math.sin(phi) * Math.cos(theta);
+    threeCamera.position.y = radius * Math.cos(phi);
+    threeCamera.position.z = radius * Math.sin(phi) * Math.sin(theta);
+    threeCamera.lookAt(0, 0, 0);
+  }
+
+  threeRenderer.domElement.addEventListener('mousedown', e => {
+    isDragging = false;
+    prevMouse = {x: e.clientX, y: e.clientY};
+    autoRotate = false;
+  });
+
+  threeRenderer.domElement.addEventListener('mousemove', e => {
+    if (e.buttons === 1) {
+      isDragging = true;
+      const dx = (e.clientX - prevMouse.x) * 0.008;
+      const dy = (e.clientY - prevMouse.y) * 0.008;
+      theta -= dx;
+      phi = Math.max(0.2, Math.min(Math.PI/2.2, phi + dy));
+      prevMouse = {x: e.clientX, y: e.clientY};
+      updateCamera();
+    }
+  });
+
+  threeRenderer.domElement.addEventListener('click', e => {
+    if (isDragging) return;
+    handle3DClick(e, T);
+  });
+
+  threeRenderer.domElement.addEventListener('wheel', e => {
+    radius = Math.max(8, Math.min(28, radius + e.deltaY * 0.02));
+    updateCamera();
+  });
+
+  window.addEventListener('resize', () => {
+    threeCamera.aspect = window.innerWidth / window.innerHeight;
+    threeCamera.updateProjectionMatrix();
+    threeRenderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Animation loop
+  let autoTheta = theta;
+  threeRenderer.setAnimationLoop(() => {
+    if (autoRotate) {
+      autoTheta += 0.003;
+      threeCamera.position.x = radius * Math.sin(phi) * Math.cos(autoTheta);
+      threeCamera.position.y = radius * Math.cos(phi);
+      threeCamera.position.z = radius * Math.sin(phi) * Math.sin(autoTheta);
+      threeCamera.lookAt(0, 0, 0);
+      theta = autoTheta;
+    }
+    threeRenderer.render(threeScene, threeCamera);
+  });
+
+  threeReady = true;
+}
+
+function build3DBoard(T) {
+  boardMeshes = [];
+  const size = 1;
+  for (let r = 0; r < 8; r++) {
+    boardMeshes[r] = [];
+    for (let c = 0; c < 8; c++) {
+      const isLight = (r + c) % 2 === 0;
+      const geo = new T.BoxGeometry(size, 0.15, size);
+      const mat = new T.MeshStandardMaterial({
+        color: isLight ? 0x3a2e20 : 0x0f0b07,
+        roughness: 0.8,
+        metalness: 0.1,
+      });
+      const mesh = new T.Mesh(geo, mat);
+      mesh.position.set(c - 3.5, 0, r - 3.5);
+      mesh.receiveShadow = true;
+      mesh.userData = { row: r, col: c, isSquare: true };
+      threeScene.add(mesh);
+      boardMeshes[r][c] = mesh;
+    }
+  }
+
+  // Board border
+  const borderGeo = new T.BoxGeometry(9, 0.2, 9);
+  const borderMat = new T.MeshStandardMaterial({ color: 0x1a1208, roughness: 0.9 });
+  const border = new T.Mesh(borderGeo, borderMat);
+  border.position.y = -0.1;
+  border.receiveShadow = true;
+  threeScene.add(border);
+
+  // Base glow plane
+  const glowGeo = new T.PlaneGeometry(20, 20);
+  const glowMat = new T.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 1 });
+  const glow = new T.Mesh(glowGeo, glowMat);
+  glow.rotation.x = -Math.PI / 2;
+  glow.position.y = -0.15;
+  glow.receiveShadow = true;
+  threeScene.add(glow);
+}
+
+function makePieceMesh(T, code) {
+  const isW = code[0] === 'w';
+  const type = code[1];
+  const color = isW ? 0xe8dcc8 : 0x1a1208;
+  const emissive = isW ? 0x2a2010 : 0x0a0805;
+
+  const mat = new T.MeshStandardMaterial({
+    color, roughness: 0.3, metalness: 0.4,
+    emissive, emissiveIntensity: 0.1
+  });
+
+  let mesh;
+
+  const heights = { P: 0.5, R: 0.7, N: 0.75, B: 0.85, Q: 1.0, K: 1.1 };
+  const radii =   { P: 0.18, R: 0.2, N: 0.2, B: 0.16, Q: 0.22, K: 0.22 };
+  const h = heights[type] || 0.6;
+  const rad = radii[type] || 0.18;
+
+  if (type === 'P') {
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.12, 0.18, h * 0.7, 12), mat);
+    body.position.y = h * 0.35;
+    const head = new T.Mesh(new T.SphereGeometry(0.15, 12, 12), mat);
+    head.position.y = h * 0.75;
+    group.add(body, head);
+    mesh = group;
+  } else if (type === 'R') {
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.17, 0.2, h * 0.8, 12), mat);
+    body.position.y = h * 0.4;
+    const top = new T.Mesh(new T.CylinderGeometry(0.2, 0.17, h * 0.25, 12), mat);
+    top.position.y = h * 0.87;
+    group.add(body, top);
+    mesh = group;
+  } else if (type === 'N') {
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.12, 0.2, h * 0.6, 12), mat);
+    body.position.y = h * 0.3;
+    const neck = new T.Mesh(new T.CylinderGeometry(0.1, 0.12, h * 0.3, 12), mat);
+    neck.position.set(0.05, h * 0.7, 0);
+    neck.rotation.z = -0.3;
+    const head = new T.Mesh(new T.SphereGeometry(0.16, 12, 12), mat);
+    head.position.set(0.1, h * 0.9, 0);
+    head.scale.set(1.2, 0.9, 0.7);
+    group.add(body, neck, head);
+    mesh = group;
+  } else if (type === 'B') {
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.1, 0.18, h * 0.75, 12), mat);
+    body.position.y = h * 0.37;
+    const head = new T.Mesh(new T.SphereGeometry(0.14, 12, 12), mat);
+    head.position.y = h * 0.82;
+    const tip = new T.Mesh(new T.ConeGeometry(0.05, 0.15, 8), mat);
+    tip.position.y = h * 1.0;
+    group.add(body, head, tip);
+    mesh = group;
+  } else if (type === 'Q') {
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.15, 0.22, h * 0.7, 16), mat);
+    body.position.y = h * 0.35;
+    const waist = new T.Mesh(new T.SphereGeometry(0.13, 12, 12), mat);
+    waist.position.y = h * 0.72;
+    const crown = new T.Mesh(new T.CylinderGeometry(0.2, 0.13, h * 0.2, 16), mat);
+    crown.position.y = h * 0.87;
+    const sphere = new T.Mesh(new T.SphereGeometry(0.08, 10, 10), mat);
+    sphere.position.y = h * 1.02;
+    group.add(body, waist, crown, sphere);
+    mesh = group;
+  } else { // K
+    const group = new T.Group();
+    const body = new T.Mesh(new T.CylinderGeometry(0.15, 0.22, h * 0.7, 16), mat);
+    body.position.y = h * 0.35;
+    const mid = new T.Mesh(new T.SphereGeometry(0.13, 12, 12), mat);
+    mid.position.y = h * 0.72;
+    const crown = new T.Mesh(new T.CylinderGeometry(0.18, 0.13, h * 0.18, 16), mat);
+    crown.position.y = h * 0.86;
+    const crossV = new T.Mesh(new T.BoxGeometry(0.06, 0.25, 0.06), mat);
+    crossV.position.y = h * 1.04;
+    const crossH = new T.Mesh(new T.BoxGeometry(0.2, 0.06, 0.06), mat);
+    crossH.position.y = h * 1.1;
+    group.add(body, mid, crown, crossV, crossH);
+    mesh = group;
+  }
+
+  mesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+  return mesh;
+}
+
+function build3DPieces(T) {
+  Object.values(pieceMeshes).forEach(m => {
+    if (m.parent) threeScene.remove(m);
+  });
+  pieceMeshes = {};
+
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = board[r][c];
+      if (!p) continue;
+      const mesh = makePieceMesh(T, p);
+      mesh.position.set(c - 3.5, 0.075, r - 3.5);
+      mesh.userData = { row: r, col: c, isPiece: true, code: p };
+      threeScene.add(mesh);
+      pieceMeshes[`${r},${c}`] = mesh;
+    }
+  }
+}
+
+function update3DBoard() {
+  if (!threeReady) return;
+  const T = THREE_lib;
+
+  // Reset square colors
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const isLight = (r + c) % 2 === 0;
+      boardMeshes[r][c].material.color.setHex(isLight ? 0x3a2e20 : 0x0f0b07);
+      boardMeshes[r][c].material.emissive?.setHex(0x000000);
+    }
+  }
+
+  // Highlight last move
+  if (lastMove) {
+    const [fr, fc, tr, tc] = lastMove;
+    boardMeshes[fr][fc].material.color.setHex(0x2a3a1a);
+    boardMeshes[tr][tc].material.color.setHex(0x2a3a1a);
+  }
+
+  // Highlight selected
+  if (selected) {
+    boardMeshes[selected[0]][selected[1]].material.color.setHex(0x4a3a10);
+    // Highlight possible moves
+    possible.forEach(([pr, pc]) => {
+      boardMeshes[pr][pc].material.color.setHex(0x3a3a10);
+    });
+  }
+
+  // Check highlight
+  if (isInCheck(board, turn)) {
+    const k = findKing(board, turn);
+    if (k) boardMeshes[k[0]][k[1]].material.color.setHex(0x5a1010);
+  }
+
+  // Rebuild pieces
+  build3DPieces(T);
+
+  // Update status
+  const inCheck = isInCheck(board, turn);
+  let status = turn === 'w'
+    ? (inCheck ? '⚠ ŞAH! — SENİN SIRAN' : 'Senin sıran — BEYAZ')
+    : 'Bilgisayar düşünüyor...';
+  document.getElementById('status3d').textContent = status;
+}
+
+function handle3DClick(e, T) {
+  const rect = threeRenderer.domElement.getBoundingClientRect();
+  const mouse = new T.Vector2(
+    ((e.clientX - rect.left) / rect.width) * 2 - 1,
+    -((e.clientY - rect.top) / rect.height) * 2 + 1
+  );
+  const raycaster = new T.Raycaster();
+  raycaster.setFromCamera(mouse, threeCamera);
+
+  // Check board squares
+  const sqObjects = [];
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) sqObjects.push(boardMeshes[r][c]);
+  const hits = raycaster.intersectObjects(sqObjects);
+
+  if (hits.length > 0) {
+    const obj = hits[0].object;
+    const { row, col } = obj.userData;
+    sqClick(row, col);
+    update3DBoard();
+  }
+}
+
+// Override render to also update 3D if active
+const _origRender = render;
+render = function() {
+  try { _origRender(); } catch(e) {}
+  if (is3D && threeReady) update3DBoard();
+};
+
 </script>
 </body>
 </html>
