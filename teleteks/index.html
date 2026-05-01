@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -52,6 +51,7 @@
       border-radius: 2px;
       overflow: hidden;
       position: relative;
+      width: 100%;
       /* CRT scanline effect */
       background-image: repeating-linear-gradient(
         0deg,
@@ -68,13 +68,24 @@
       padding: 0;
       font-size: clamp(11px, 3.2vw, 22px);
       line-height: 1.35;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.03em;
+      width: 100%;
+      display: block;
+      box-sizing: border-box;
     }
 
     /* Row */
     .row {
-      display: flex;
+      display: block;
       width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .c {
+      display: inline;
+      padding: 1px 2px;
+      white-space: pre;
     }
 
     /* Cell */
@@ -229,17 +240,38 @@ setInterval(() => {
 // ─── HEADER / FOOTER ─────────────────────────────────────────────────────────
 function makeHeader(pageNum, pageTitle) {
   const f = document.createDocumentFragment();
-  // Header line 1
-  const h1 = row(
-    cell(' MEİYO ', 'fg-black', 'bg-white', 'bold') +
-    cell(center('TELETEXT', 32), 'fg-yellow', 'bg-blue') +
-    cell(' P' + pageNum + ' ', 'fg-cyan', 'bg-blue') +
-    cell('<span id="headerClock">' + getTime() + '</span>', 'fg-white', 'bg-dkblue')
-  );
-  // Header line 2
-  const h2 = row(
-    cell('=' .repeat(55), 'fg-cyan', 'bg-black')
-  );
+
+  // Full-width header using a div with flex
+  const h1 = document.createElement('div');
+  h1.style.cssText = 'display:flex; width:100%; font-family:VT323,monospace; font-size:inherit; line-height:1.4;';
+
+  const logo = document.createElement('span');
+  logo.className = 'c fg-black bg-white bold';
+  logo.textContent = ' MEİYO ';
+
+  const mid = document.createElement('span');
+  mid.className = 'c fg-yellow bg-blue';
+  mid.style.cssText = 'flex:1; text-align:center; display:inline-block;';
+  mid.textContent = 'TELETEXT';
+
+  const pnum = document.createElement('span');
+  pnum.className = 'c fg-cyan bg-blue';
+  pnum.textContent = ' P' + pageNum + ' ';
+
+  const clk = document.createElement('span');
+  clk.className = 'c fg-white bg-dkblue';
+  clk.id = 'headerClock';
+  clk.textContent = getTime();
+
+  h1.appendChild(logo);
+  h1.appendChild(mid);
+  h1.appendChild(pnum);
+  h1.appendChild(clk);
+
+  const h2 = document.createElement('div');
+  h2.style.cssText = 'width:100%; overflow:hidden;';
+  h2.innerHTML = '<span class="c fg-cyan bg-black" style="display:block;width:100%;overflow:hidden;">' + '='.repeat(80) + '</span>';
+
   f.appendChild(h1);
   f.appendChild(h2);
   return f;
@@ -247,7 +279,9 @@ function makeHeader(pageNum, pageTitle) {
 
 function makeFooter() {
   const f = document.createDocumentFragment();
-  const f1 = row(cell('=' .repeat(55), 'fg-cyan', 'bg-black'));
+  const f1 = document.createElement('div');
+  f1.style.cssText = 'width:100%; overflow:hidden;';
+  f1.innerHTML = '<span class="c fg-cyan bg-black" style="display:block;width:100%;overflow:hidden;">' + '='.repeat(80) + '</span>';
   f.appendChild(f1);
   return f;
 }
@@ -255,30 +289,57 @@ function makeFooter() {
 // ─── PAGE 100: ANA ───────────────────────────────────────────────────────────
 function showAna() {
   screen.innerHTML = '';
+  screen.style.textAlign = 'left';
   screen.appendChild(makeHeader('100', 'ANA SAYFA'));
 
-  const lines = [
-    ['', ''],
-    [center('HOŞGELDİNİZ', 55), 'fg-yellow'],
-    [center('meiyo.world teletext servisi', 55), 'fg-cyan'],
-    ['', ''],
-    ['', ''],
-    ['   100   ANA SAYFA', 'fg-yellow'],
-    ['   200   SPOR SONUCLARI     Super Lig & Avrupa', 'fg-white'],
-    ['   300   BORSA              BIST 100', 'fg-white'],
-    ['   400   DOVIZ              USD EUR GBP', 'fg-white'],
-    ['   500   HAVA DURUMU        Turkiye', 'fg-white'],
-    ['', ''],
-    ['', ''],
-    [center(getDate(), 55), 'fg-green'],
-    [center(getTime(), 55), 'fg-yellow'],
-    ['', ''],
-    [center('■ VERİLER OTOMATİK GÜNCELLENİR ■', 55), 'fg-cyan'],
+  const addLine = (text, color, align) => {
+    const d = document.createElement('div');
+    d.style.cssText = `width:100%; padding:1px 0; text-align:${align||'left'};`;
+    d.className = 'c ' + color;
+    d.textContent = text;
+    screen.appendChild(d);
+  };
+
+  const menu = [
+    ['100', 'ANA SAYFA',     '',                   'fg-yellow'],
+    ['200', 'SPOR',          'Super Lig & Avrupa',  'fg-white'],
+    ['300', 'BORSA',         'BIST 100',            'fg-white'],
+    ['400', 'DOVIZ',         'USD EUR GBP',         'fg-white'],
+    ['500', 'HAVA DURUMU',   'Turkiye',             'fg-white'],
   ];
 
-  lines.forEach(([text, color]) => {
-    screen.appendChild(row(cell(text || ' '.repeat(55), color || 'fg-white', 'bg-black')));
+  addLine('', 'fg-white');
+  addLine('HOSGELDINİZ', 'fg-yellow', 'center');
+  addLine('meiyo.world teletext servisi', 'fg-cyan', 'center');
+  addLine('', 'fg-white');
+  addLine('', 'fg-white');
+
+  // Menu table
+  const tbl = document.createElement('div');
+  tbl.style.cssText = 'display:inline-block; text-align:left; margin:0 auto;';
+  menu.forEach(([num, title, desc, fg]) => {
+    const r = document.createElement('div');
+    r.style.cssText = 'display:flex; gap:1em; padding:2px 0;';
+    const n = document.createElement('span');
+    n.className = 'c fg-cyan'; n.style.minWidth='3em'; n.textContent = num;
+    const t = document.createElement('span');
+    t.className = 'c ' + fg; t.style.minWidth='14em'; t.textContent = title;
+    const d2 = document.createElement('span');
+    d2.className = 'c fg-white'; d2.textContent = desc;
+    r.appendChild(n); r.appendChild(t); r.appendChild(d2);
+    tbl.appendChild(r);
   });
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'width:100%; text-align:center; margin:4px 0;';
+  wrap.appendChild(tbl);
+  screen.appendChild(wrap);
+
+  addLine('', 'fg-white');
+  addLine('', 'fg-white');
+  addLine(getDate(), 'fg-green', 'center');
+  addLine(getTime(), 'fg-yellow', 'center');
+  addLine('', 'fg-white');
+  addLine('[ VERİLER OTOMATİK GÜNCELLENİR ]', 'fg-cyan', 'center');
 
   screen.appendChild(makeFooter());
 }
@@ -286,6 +347,7 @@ function showAna() {
 // ─── PAGE 200: SPOR ─────────────────────────────────────────────────────────
 async function showSpor() {
   screen.innerHTML = '';
+  screen.style.textAlign = 'left';
   screen.appendChild(makeHeader('200', 'SPOR'));
 
   const loadRow = row(cell(center('⧗ VERİLER YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
@@ -385,6 +447,7 @@ async function showSpor() {
 // ─── PAGE 300: BORSA ────────────────────────────────────────────────────────
 async function showBorsa() {
   screen.innerHTML = '';
+  screen.style.textAlign = 'left';
   screen.appendChild(makeHeader('300', 'BORSA'));
 
   screen.appendChild(row(cell(' ◄ BORSA İSTANBUL — BIST 100 ► ', 'fg-black', 'bg-yellow', 'bold')));
@@ -424,6 +487,7 @@ async function showBorsa() {
 // ─── PAGE 400: DÖVİZ ────────────────────────────────────────────────────────
 async function showDoviz() {
   screen.innerHTML = '';
+  screen.style.textAlign = 'left';
   screen.appendChild(makeHeader('400', 'DÖVİZ'));
 
   const loadRow = row(cell(center('⧗ DÖVİZ VERİLERİ YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
@@ -500,6 +564,7 @@ async function showDoviz() {
 // ─── PAGE 500: HAVA ──────────────────────────────────────────────────────────
 async function showHava() {
   screen.innerHTML = '';
+  screen.style.textAlign = 'left';
   screen.appendChild(makeHeader('500', 'HAVA DURUMU'));
 
   const loadRow = row(cell(center('⧗ HAVA VERİLERİ YÜKLENİYOR...', 55), 'fg-cyan', 'bg-black', 'blink'));
