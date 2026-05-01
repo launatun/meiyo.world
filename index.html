@@ -244,6 +244,39 @@
       max-width: 200px;
     }
     .now-playing.hidden { display: none; }
+
+    /* Weather widget */
+    .weather-widget {
+      position: fixed;
+      top: 5rem;
+      right: 2rem;
+      z-index: 50;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 2px;
+      opacity: 0;
+      animation: fadeUp 1s 1.5s forwards;
+    }
+    .weather-temp {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--text);
+      line-height: 1;
+    }
+    .weather-city {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+    .weather-desc {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      color: rgba(232,228,221,0.25);
+    }
   </style>
 </head>
 <body>
@@ -371,6 +404,13 @@
       <div class="footer-right">© 2026 meiyo.world</div>
     </footer>
 
+
+  <!-- Weather widget -->
+  <div class="weather-widget" id="weatherWidget" style="display:none">
+    <div class="weather-temp" id="weatherTemp">—</div>
+    <div class="weather-city" id="weatherCity">—</div>
+    <div class="weather-desc" id="weatherDesc">—</div>
+  </div>
 
   <!-- Secret modal -->
   <div class="secret-modal" id="secretModal" onclick="closeOnBg(event)">
@@ -550,6 +590,37 @@
     if (titleEl) {
       titleEl.innerHTML = `${getGreeting()}<br>ben <em>Meiyo.</em>`;
     }
+
+    // Weather widget
+    const weatherCodes = {
+      0:'Açık',1:'Az Bulutlu',2:'Parçalı Bulutlu',3:'Bulutlu',
+      45:'Sisli',48:'Sisli',51:'Çisenti',53:'Çisenti',55:'Çisenti',
+      61:'Yağmurlu',63:'Yağmurlu',65:'Yağmurlu',
+      71:'Karlı',73:'Karlı',75:'Karlı',
+      80:'Sağanak',81:'Sağanak',82:'Sağanak',
+      95:'Fırtınalı',96:'Fırtınalı',99:'Fırtınalı'
+    };
+
+    async function loadWeather() {
+      try {
+        const geoRes = await fetch('https://ipapi.co/json/');
+        const geo = await geoRes.json();
+        const { city, latitude, longitude } = geo;
+        if (!latitude || !longitude) return;
+
+        const wxRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weathercode&timezone=auto`);
+        const wx = await wxRes.json();
+        const temp = Math.round(wx.current.temperature_2m);
+        const code = wx.current.weathercode;
+        const desc = weatherCodes[code] || '—';
+
+        document.getElementById('weatherTemp').textContent = `${temp}°`;
+        document.getElementById('weatherCity').textContent = city?.toUpperCase() || '—';
+        document.getElementById('weatherDesc').textContent = desc;
+        document.getElementById('weatherWidget').style.display = 'flex';
+      } catch(e) {}
+    }
+    loadWeather();
   </script>
 </body>
 </html>
