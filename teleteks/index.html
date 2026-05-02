@@ -375,7 +375,7 @@ async function showSpor() {
     screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
     screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
-    const trTable = trData.standings?.[0]?.table?.slice(0,5) || [];
+    const trTable = (trData.standings?.[0]?.table || []).filter(t => !(t.team?.name||'').toLowerCase().includes('amed')).slice(0,5);
     if(trTable.length > 0) {
       trTable.forEach(t => {
         const fg = t.position===1?'fg-cyan':'fg-white';
@@ -417,6 +417,7 @@ async function showSpor() {
     screen.appendChild(row(cell(' #  ' + pad('TAKIM',16) + padL('O',4) + padL('G',4) + padL('B',4) + padL('M',4) + padL('P',5), 'fg-cyan', 'bg-black')));
     screen.appendChild(row(cell('-'.repeat(55), 'fg-white', 'bg-black')));
 
+    // Amedspor filtered
     [['1','Galatasaray',32,22,8,2,74],['2','Fenerbahçe',32,21,4,7,67],
      ['3','Trabzonspor',32,19,8,5,65],['4','Beşiktaş',32,17,8,7,59],
      ['5','Başakşehir',32,15,6,11,51]].forEach(([pos,name,o,g,b,m,p]) => {
