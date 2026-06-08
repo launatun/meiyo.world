@@ -51,7 +51,8 @@
 
   /* image placeholders */
   .imgph{position:relative;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
-  .imgph::before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,175,55,.22)}
+  .imgph::before{content:"";position:absolute;inset:14px;border:1px solid rgba(212,175,55,.28);z-index:2;pointer-events:none}
+  .imgph svg{position:absolute;inset:0;width:100%;height:100%;z-index:0;display:block}
   .imgph .cap{position:absolute;left:0;right:0;bottom:20px;text-align:center;font-family:var(--display);font-size:.7rem;letter-spacing:.24em;text-transform:uppercase;color:var(--gray-2)}
   .imgph .mono{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-weight:900;font-size:2.6rem;color:rgba(212,175,55,.14);letter-spacing:.1em}
 
@@ -81,7 +82,7 @@
   /* ---------- HERO ---------- */
   .hero{padding:160px 0 0}
   .hero-top{display:grid;grid-template-columns:1.6fr 1fr;gap:50px;align-items:end;margin-bottom:50px}
-  .hero h1{font-size:clamp(3rem,9vw,7.2rem);font-weight:900;line-height:.92}
+  .hero h1{font-size:clamp(2.3rem,6.2vw,4.8rem);font-weight:900;line-height:.98}
   .hero-right{padding-bottom:10px}
   .hero-since{font-family:var(--display);font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;font-weight:600}
   .hero-right .stack{font-family:var(--display);font-size:clamp(1.3rem,2.4vw,1.9rem);font-weight:700;text-transform:uppercase;line-height:1.25;color:var(--white)}
@@ -107,10 +108,18 @@
 
   /* ---------- SERVICES (C) ---------- */
   .services h2{font-size:clamp(2rem,3.6vw,2.9rem);margin-bottom:46px}
-  .serv-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px 60px}
-  .serv{display:flex;align-items:center;gap:18px;font-family:var(--display);font-size:clamp(1.2rem,2.2vw,1.7rem);font-weight:700;text-transform:uppercase;padding:14px 0;border-bottom:1px solid var(--line);transition:.3s;cursor:default}
-  .serv .arr{color:var(--gold);font-weight:700}
-  .serv:hover{padding-left:14px;color:var(--gold)}
+  .serv-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 60px}
+  .serv-item{border-bottom:1px solid var(--line)}
+  .serv{width:100%;background:none;border:none;color:var(--white);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:18px;font-family:var(--display);font-size:clamp(1.15rem,2.1vw,1.6rem);font-weight:700;text-transform:uppercase;padding:18px 0;transition:.3s}
+  .serv .label{display:flex;align-items:center;gap:16px}
+  .serv .arr{color:var(--gold);font-weight:700;transition:.3s}
+  .serv .ic{color:var(--gold);font-size:1.3rem;transition:.3s;flex-shrink:0}
+  .serv:hover{color:var(--gold)}
+  .serv:hover .label{transform:translateX(8px);transition:.3s}
+  .serv-item.open .serv .ic{transform:rotate(45deg)}
+  .serv-item.open .serv{color:var(--gold)}
+  .serv-a{max-height:0;overflow:hidden;transition:max-height .4s ease}
+  .serv-a p{color:var(--gray);font-family:var(--body);font-size:.92rem;font-weight:400;text-transform:none;letter-spacing:0;line-height:1.6;padding:0 0 20px 34px;max-width:440px}
 
   /* ---------- WHY ---------- */
   .why-grid{display:grid;grid-template-columns:0.85fr 1.15fr;gap:60px;align-items:start}
@@ -217,17 +226,34 @@
 <section class="hero" id="hero">
   <div class="wrap">
     <div class="hero-top">
-      <h1 class="display">MODERN<br>YAPILAR</h1>
+      <h1 class="display">ZAMANSIZ MİMARİ<br><span class="gold">KALICI DEĞER</span></h1>
       <div class="hero-right">
-        <div class="hero-since">— 2011'den beri</div>
+        <div class="hero-since">— 1990'dan beri</div>
         <div class="stack">İnşaat.<br>Tasarım.<br>Proje.</div>
       </div>
     </div>
   </div>
   <div class="wrap">
     <div class="imgph hero-img">
-      <div class="mono">AYSM</div>
-      <div class="cap">Hero görseli — proje fotoğrafınızı buraya ekleyin</div>
+      <svg viewBox="0 0 1280 488" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modern villa projesi - temsili görsel">
+        <defs>
+          <linearGradient id="hsky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c0c0c"/><stop offset="1" stop-color="#1a1510"/></linearGradient>
+          <radialGradient id="hsun" cx="0.8" cy="0.3" r="0.5"><stop offset="0" stop-color="#d4af37" stop-opacity="0.42"/><stop offset="1" stop-color="#d4af37" stop-opacity="0"/></radialGradient>
+          <pattern id="hwin" width="34" height="40" patternUnits="userSpaceOnUse"><rect x="9" y="9" width="16" height="22" fill="#000" opacity="0.4"/></pattern>
+        </defs>
+        <rect width="1280" height="488" fill="url(#hsky)"/>
+        <rect width="1280" height="488" fill="url(#hsun)"/>
+        <circle cx="1000" cy="150" r="44" fill="#d4af37" opacity="0.9"/>
+        <g opacity="0.5"><rect x="120" y="250" width="120" height="170" fill="#262626"/><rect x="250" y="210" width="90" height="210" fill="#202020"/><rect x="1020" y="230" width="130" height="190" fill="#242424"/><rect x="1150" y="270" width="80" height="150" fill="#1d1d1d"/></g>
+        <rect x="300" y="170" width="300" height="250" fill="#1c1c1c"/><rect x="300" y="170" width="300" height="250" fill="url(#hwin)"/>
+        <rect x="600" y="240" width="220" height="180" fill="#242424"/><rect x="600" y="240" width="220" height="180" fill="url(#hwin)"/>
+        <rect x="820" y="120" width="270" height="300" fill="#181818"/><rect x="820" y="120" width="270" height="300" fill="url(#hwin)"/>
+        <rect x="80" y="300" width="260" height="120" fill="#2b2b2b"/><rect x="80" y="300" width="260" height="6" fill="#d4af37" opacity="0.55"/>
+        <g fill="#d4af37"><rect x="343" y="196" width="16" height="22" opacity="0.85"/><rect x="411" y="270" width="16" height="22" opacity="0.7"/><rect x="479" y="236" width="16" height="22" opacity="0.6"/><rect x="857" y="155" width="16" height="22" opacity="0.85"/><rect x="925" y="229" width="16" height="22" opacity="0.6"/><rect x="993" y="195" width="16" height="22" opacity="0.7"/><rect x="643" y="276" width="16" height="22" opacity="0.7"/><rect x="120" y="332" width="22" height="26" opacity="0.85"/><rect x="180" y="332" width="22" height="26" opacity="0.5"/></g>
+        <path d="M1068 418 C1062 360 1072 318 1082 292" stroke="#090909" stroke-width="8" fill="none"/>
+        <g stroke="#090909" stroke-width="6" fill="none"><path d="M1082 292 q -44 -8 -70 14"/><path d="M1082 292 q -30 -30 -26 -60"/><path d="M1082 292 q 38 -24 68 -16"/><path d="M1082 292 q 26 -36 18 -66"/><path d="M1082 292 q 48 8 64 34"/></g>
+        <rect x="0" y="418" width="1280" height="70" fill="#0b0b0b"/><rect x="0" y="418" width="1280" height="2" fill="#d4af37" opacity="0.25"/>
+      </svg>
     </div>
   </div>
 </section>
@@ -264,8 +290,36 @@
     <div class="marker reveal"><div class="dot">B</div><div class="lbl">Projelerimiz</div><div class="rule"></div></div>
     <div class="proj-grid">
       <div class="proj-imgs reveal">
-        <div class="imgph"><div class="mono">01</div><div class="cap">Proje görseli</div></div>
-        <div class="imgph"><div class="mono">02</div><div class="cap">Proje görseli</div></div>
+        <div class="imgph">
+          <svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modern bina cephesi - temsili görsel">
+            <defs>
+              <linearGradient id="p1bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171717"/><stop offset="1" stop-color="#0c0c0c"/></linearGradient>
+              <pattern id="p1w" width="70" height="78" patternUnits="userSpaceOnUse"><rect x="14" y="14" width="42" height="50" fill="#0b0b0b" opacity="0.55"/><rect x="14" y="14" width="42" height="50" fill="none" stroke="#2c2c2c" stroke-width="1.4"/></pattern>
+            </defs>
+            <rect width="600" height="800" fill="url(#p1bg)"/>
+            <rect x="120" y="90" width="360" height="710" fill="#1f1f1f"/>
+            <rect x="120" y="90" width="360" height="710" fill="url(#p1w)"/>
+            <rect x="120" y="90" width="8" height="710" fill="#d4af37" opacity="0.55"/>
+            <g fill="#d4af37"><rect x="134" y="182" width="42" height="50" opacity="0.8"/><rect x="274" y="338" width="42" height="50" opacity="0.6"/><rect x="344" y="494" width="42" height="50" opacity="0.7"/><rect x="204" y="650" width="42" height="50" opacity="0.5"/></g>
+          </svg>
+        </div>
+        <div class="imgph">
+          <svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modern villa - temsili görsel">
+            <defs>
+              <linearGradient id="p2bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#13110d"/><stop offset="1" stop-color="#0b0b0b"/></linearGradient>
+              <radialGradient id="p2g" cx="0.5" cy="0.18" r="0.6"><stop offset="0" stop-color="#d4af37" stop-opacity="0.22"/><stop offset="1" stop-color="#d4af37" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="600" height="800" fill="url(#p2bg)"/>
+            <rect width="600" height="800" fill="url(#p2g)"/>
+            <rect x="220" y="200" width="300" height="130" fill="#1d1d1d"/>
+            <rect x="80" y="300" width="300" height="160" fill="#252525"/>
+            <rect x="140" y="430" width="380" height="200" fill="#2b2b2b"/>
+            <g stroke="#0b0b0b" stroke-width="3"><line x1="140" y1="488" x2="520" y2="488"/><line x1="140" y1="548" x2="520" y2="548"/><line x1="80" y1="360" x2="380" y2="360"/></g>
+            <rect x="250" y="232" width="120" height="68" fill="#d4af37" opacity="0.78"/>
+            <rect x="168" y="462" width="64" height="120" fill="#d4af37" opacity="0.45"/>
+            <rect x="0" y="628" width="600" height="172" fill="#0a0a0a"/><rect x="0" y="628" width="600" height="2" fill="#d4af37" opacity="0.3"/>
+          </svg>
+        </div>
       </div>
       <div class="proj-text reveal">
         <h3>HAYATA GEÇİRDİĞİMİZ ESERLER</h3>
@@ -282,12 +336,30 @@
     <div class="marker reveal"><div class="dot">C</div><div class="lbl">Hizmetler</div><div class="rule"></div></div>
     <h2 class="reveal">NELER YAPIYORUZ</h2>
     <div class="serv-cols reveal">
-      <div class="serv"><span class="arr">→</span> Konut İnşaatı</div>
-      <div class="serv"><span class="arr">→</span> Mimari Tasarım</div>
-      <div class="serv"><span class="arr">→</span> Ticari Yapılar</div>
-      <div class="serv"><span class="arr">→</span> Tadilat &amp; Renovasyon</div>
-      <div class="serv"><span class="arr">→</span> Endüstriyel Tesisler</div>
-      <div class="serv"><span class="arr">→</span> Proje Yönetimi</div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Konut İnşaatı</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Villa, apartman ve site projelerinde modern tasarım ile dayanıklı, yüksek konforlu yapı çözümleri sunuyoruz.</p></div>
+      </div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Mimari Tasarım</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Konsept tasarımdan uygulama projelerine kadar mimari ve mühendislik danışmanlığı sağlıyoruz.</p></div>
+      </div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Ticari Yapılar</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Ofis, mağaza, AVM ve iş merkezleri için fonksiyonel ve prestijli ticari inşaat hizmetleri veriyoruz.</p></div>
+      </div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Tadilat &amp; Renovasyon</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Mevcut yapılarınızı yenileyerek değerini ve kullanım konforunu artıran kapsamlı renovasyon çözümleri uyguluyoruz.</p></div>
+      </div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Endüstriyel Tesisler</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Fabrika, depo ve lojistik tesisleri için yüksek mühendislik standartlarında dayanıklı yapılar inşa ediyoruz.</p></div>
+      </div>
+      <div class="serv-item">
+        <button class="serv"><span class="label"><span class="arr">→</span> Proje Yönetimi</span><span class="ic">+</span></button>
+        <div class="serv-a"><p>Süre, maliyet ve kalite dengesini koruyan profesyonel şantiye ve proje yönetimi hizmeti sunuyoruz.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -297,7 +369,21 @@
   <div class="wrap">
     <div class="marker reveal"><div class="dot">D</div><div class="lbl">Neden Biz</div><div class="rule"></div></div>
     <div class="why-grid">
-      <div class="imgph why-img reveal"><div class="mono">AYSM</div><div class="cap">İç mekan / şantiye görseli</div></div>
+      <div class="imgph why-img reveal">
+        <svg viewBox="0 0 600 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Modern iç mekan - temsili görsel">
+          <defs><linearGradient id="wbg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#171717"/><stop offset="1" stop-color="#0d0d0d"/></linearGradient></defs>
+          <rect width="600" height="800" fill="url(#wbg)"/>
+          <rect x="380" y="80" width="170" height="280" fill="#d4af37" opacity="0.10"/>
+          <rect x="380" y="80" width="170" height="280" fill="none" stroke="#2c2c2c" stroke-width="1.5"/>
+          <line x1="465" y1="80" x2="465" y2="360" stroke="#2c2c2c" stroke-width="1.5"/><line x1="380" y1="220" x2="550" y2="220" stroke="#2c2c2c" stroke-width="1.5"/>
+          <g fill="#242424" stroke="#0c0c0c" stroke-width="2">
+            <rect x="110" y="360" width="100" height="30"/><rect x="152" y="402" width="100" height="30"/><rect x="194" y="444" width="100" height="30"/><rect x="236" y="486" width="100" height="30"/><rect x="278" y="528" width="100" height="30"/><rect x="320" y="570" width="100" height="30"/><rect x="362" y="612" width="100" height="30"/>
+          </g>
+          <path d="M150 352 L430 632" stroke="#d4af37" stroke-width="3" fill="none" opacity="0.75"/>
+          <g stroke="#d4af37" stroke-width="2" opacity="0.55"><line x1="172" y1="374" x2="160" y2="362"/><line x1="214" y1="416" x2="202" y2="404"/><line x1="256" y1="458" x2="244" y2="446"/><line x1="298" y1="500" x2="286" y2="488"/><line x1="340" y1="542" x2="328" y2="530"/><line x1="382" y1="584" x2="370" y2="572"/></g>
+          <rect x="0" y="700" width="600" height="100" fill="#0b0b0b"/>
+        </svg>
+      </div>
       <div class="reveal">
         <h2>NEDEN BİZİ SEÇMELİSİNİZ</h2>
         <div class="feat-grid">
@@ -409,6 +495,14 @@
       const isOpen=item.classList.contains('open');
       document.querySelectorAll('.faq-item').forEach(i=>{i.classList.remove('open');i.querySelector('.faq-a').style.maxHeight=null;});
       if(!isOpen){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}
+    });
+  });
+
+  document.querySelectorAll('.serv').forEach(s=>{
+    s.addEventListener('click',()=>{
+      const item=s.parentElement, a=item.querySelector('.serv-a');
+      const open=item.classList.toggle('open');
+      a.style.maxHeight=open?a.scrollHeight+'px':null;
     });
   });
 
