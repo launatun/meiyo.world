@@ -112,7 +112,8 @@
 
   /* ---------- SERVICES (C) ---------- */
   .services h2{font-size:clamp(2rem,3.6vw,2.9rem);margin-bottom:46px}
-  .serv-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 60px}
+  .serv-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 60px;align-items:start}
+  .serv-col{display:flex;flex-direction:column}
   .serv-item{border-bottom:1px solid var(--line)}
   .serv{width:100%;background:none;border:none;color:var(--white);cursor:pointer;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:18px;font-family:var(--display);font-size:clamp(1.15rem,2.1vw,1.6rem);font-weight:700;text-transform:uppercase;padding:18px 0;transition:.3s}
   .serv .label{display:flex;align-items:center;gap:16px}
@@ -305,37 +306,41 @@
   <div class="wrap">
     <div class="marker reveal"><div class="lbl">Hizmetler</div><div class="rule"></div></div>
     <div class="serv-cols reveal">
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Anahtar Teslim Konut Projeleri</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Arsa analizinden proje tasarımına, ruhsat süreçlerinden son kat boyasına kadar tüm aşamaları tek elden yürütüyoruz. Lüks villalardan müstakil konutlara, apartmanlardan site projelerine kadar her ölçekte konut yapısını, planlanan bütçe ve takvime sadık kalarak yaşamaya hazır şekilde teslim ediyoruz.</p></div>
+      <div class="serv-col">
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Anahtar Teslim Konut Projeleri</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Arsa analizinden proje tasarımına, ruhsat süreçlerinden son kat boyasına kadar tüm aşamaları tek elden yürütüyoruz. Lüks villalardan müstakil konutlara, apartmanlardan site projelerine kadar her ölçekte konut yapısını, planlanan bütçe ve takvime sadık kalarak yaşamaya hazır şekilde teslim ediyoruz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Ticari ve Endüstriyel Yapılar</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Ofis binaları, alışveriş merkezleri (AVM), hastane ve sağlık tesisleri, fabrika, depo ve lojistik merkezleri ile her türlü kamu binası ve devlet dairesi inşaatını, yapının kullanım amacına ve ilgili mevzuata uygun şekilde projelendirip inşa ediyoruz. Fonksiyonellik, enerji verimliliği ve uzun ömürlü yapı kalitesini bir arada sunuyoruz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Kentsel Dönüşüm ve Yıkım Hizmetleri</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Riskli yapı tespitinden yıkım ruhsatına, hak sahipleriyle anlaşma süreçlerinden yeni yapının teslimine kadar kentsel dönüşümün tüm adımlarında yanınızdayız. Kontrollü yıkım çalışmalarımızı çevre güvenliği ve mevzuata tam uyum içinde gerçekleştiriyoruz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Tadilat ve Renovasyon</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Konut, villa, iş yeri, hastane ve kamu binalarını günümüz ihtiyaçlarına ve standartlarına uygun hale getiriyoruz. Komple yenileme, mutfak-banyo tadilatı, cephe yenileme ve iç mekân düzenlemelerinde, yaşam ve çalışma alanlarınızı en az kesintiyle modernize ediyoruz.</p></div>
+        </div>
       </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Ticari ve Endüstriyel Yapılar</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Ofis binaları, alışveriş merkezleri (AVM), hastane ve sağlık tesisleri, fabrika, depo ve lojistik merkezleri ile her türlü kamu binası ve devlet dairesi inşaatını, yapının kullanım amacına ve ilgili mevzuata uygun şekilde projelendirip inşa ediyoruz. Fonksiyonellik, enerji verimliliği ve uzun ömürlü yapı kalitesini bir arada sunuyoruz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Kentsel Dönüşüm ve Yıkım Hizmetleri</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Riskli yapı tespitinden yıkım ruhsatına, hak sahipleriyle anlaşma süreçlerinden yeni yapının teslimine kadar kentsel dönüşümün tüm adımlarında yanınızdayız. Kontrollü yıkım çalışmalarımızı çevre güvenliği ve mevzuata tam uyum içinde gerçekleştiriyoruz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Tadilat ve Renovasyon</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Konut, villa, iş yeri, hastane ve kamu binalarını günümüz ihtiyaçlarına ve standartlarına uygun hale getiriyoruz. Komple yenileme, mutfak-banyo tadilatı, cephe yenileme ve iç mekân düzenlemelerinde, yaşam ve çalışma alanlarınızı en az kesintiyle modernize ediyoruz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Güçlendirme ve Yapısal Onarım</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Deprem performans analizi sonucunda güçlendirme ihtiyacı tespit edilen konut, hastane, okul ve kamu yapılarında; kolon mantolama, perde duvar ilavesi, karbon fiber takviye gibi mühendislik çözümleri uyguluyoruz. Yapınızın ömrünü uzatırken güvenliğini güncel deprem yönetmeliğine uygun seviyeye taşıyoruz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Mimari Proje ve Mühendislik Hizmetleri</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Uzman mimar ve mühendis kadromuzla villa, konut, AVM, hastane ve kamu binası projelerinizin mimari, statik, mekanik ve elektrik projelerini hazırlıyor; ruhsat, iskân ve resmi kurum süreçlerinizi yönetiyoruz. İster yeni yapı ister mevcut yapıda tadilat projesi olsun, tüm teknik çizim ve onay süreçlerini üstleniyoruz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Kaba ve İnce Yapı İşleri</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Hafriyat, temel, betonarme karkas gibi kaba yapı işlerinden; alçı, boya, seramik, parke, asma tavan gibi ince yapı uygulamalarına kadar her ölçekte taahhüt hizmeti veriyoruz. Konuttan hastaneye, villadan kamu binasına kadar projenizin yalnızca belirli bir aşamasında da profesyonel destek alabilirsiniz.</p></div>
-      </div>
-      <div class="serv-item">
-        <button class="serv"><span class="label"><span class="arr">→</span> Peyzaj ve Çevre Düzenleme</span><span class="ic">+</span></button>
-        <div class="serv-a"><p>Villa bahçelerinden site ortak alanlarına, hastane ve kamu binası çevrelerine kadar; yollar, otoparklar, istinat duvarları ve yeşil alan düzenlemeleriyle yapınızın çevresini tamamlıyoruz. Sert zemin uygulamaları, aydınlatma ve sulama sistemleriyle dış mekânlarınızı estetik ve kullanışlı hale getiriyoruz.</p></div>
+      <div class="serv-col">
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Güçlendirme ve Yapısal Onarım</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Deprem performans analizi sonucunda güçlendirme ihtiyacı tespit edilen konut, hastane, okul ve kamu yapılarında; kolon mantolama, perde duvar ilavesi, karbon fiber takviye gibi mühendislik çözümleri uyguluyoruz. Yapınızın ömrünü uzatırken güvenliğini güncel deprem yönetmeliğine uygun seviyeye taşıyoruz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Mimari Proje ve Mühendislik Hizmetleri</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Uzman mimar ve mühendis kadromuzla villa, konut, AVM, hastane ve kamu binası projelerinizin mimari, statik, mekanik ve elektrik projelerini hazırlıyor; ruhsat, iskân ve resmi kurum süreçlerinizi yönetiyoruz. İster yeni yapı ister mevcut yapıda tadilat projesi olsun, tüm teknik çizim ve onay süreçlerini üstleniyoruz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Kaba ve İnce Yapı İşleri</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Hafriyat, temel, betonarme karkas gibi kaba yapı işlerinden; alçı, boya, seramik, parke, asma tavan gibi ince yapı uygulamalarına kadar her ölçekte taahhüt hizmeti veriyoruz. Konuttan hastaneye, villadan kamu binasına kadar projenizin yalnızca belirli bir aşamasında da profesyonel destek alabilirsiniz.</p></div>
+        </div>
+        <div class="serv-item">
+          <button class="serv"><span class="label"><span class="arr">→</span> Peyzaj ve Çevre Düzenleme</span><span class="ic">+</span></button>
+          <div class="serv-a"><p>Villa bahçelerinden site ortak alanlarına, hastane ve kamu binası çevrelerine kadar; yollar, otoparklar, istinat duvarları ve yeşil alan düzenlemeleriyle yapınızın çevresini tamamlıyoruz. Sert zemin uygulamaları, aydınlatma ve sulama sistemleriyle dış mekânlarınızı estetik ve kullanışlı hale getiriyoruz.</p></div>
+        </div>
       </div>
     </div>
   </div>
