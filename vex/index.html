@@ -69,123 +69,18 @@
         transition-property: opacity;
       }
 
-      /* --- Bina cephesinden sarkan bayraklar --- */
-      .flag-wrap {
-        position: absolute;
-        top: 0;
-        z-index: 2;
-        transform-origin: top center;
-        animation: flagSway 6.5s ease-in-out infinite;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-        will-change: transform;
-      }
-      /* binaya tutturma çıtası */
-      .flag-wrap::after {
-        content: '';
-        position: absolute;
-        top: -7px;
-        left: -3%;
-        width: 106%;
-        height: 11px;
-        background: linear-gradient(#454545, #0e0e0e);
-        border-radius: 3px;
-        box-shadow: 0 2px 7px rgba(0, 0, 0, 0.55);
-      }
-      .flag-wrap-turk {
-        left: 4%;
-        width: clamp(120px, 13vw, 220px);
-        height: clamp(300px, 56vh, 600px);
-      }
-      .flag-cloth {
-        position: absolute;
-        inset: 0;
-        filter: url(#flagWave);
-      }
-      .flag-turk {
-        background: #e30a17;
-        border-radius: 2px;
-      }
-      .flag-emblem {
-        position: absolute;
-        top: 11%;
-        left: 50%;
-        width: 76%;
-        transform: translateX(-50%);
-        pointer-events: none;
-      }
-      /* kumaş kıvrım ve gölgeleri */
-      .flag-folds {
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(
-          90deg,
-          rgba(255, 255, 255, 0.06) 0px,
-          rgba(0, 0, 0, 0) 12px,
-          rgba(0, 0, 0, 0.18) 26px,
-          rgba(0, 0, 0, 0) 42px
-        );
-        mix-blend-mode: multiply;
-        pointer-events: none;
-        animation: foldShift 6.5s ease-in-out infinite;
-      }
-      /* tutturma yerinde üst gölge */
-      .flag-folds::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0) 14%);
-        pointer-events: none;
-      }
-      @keyframes flagSway {
-        0%, 100% { transform: rotate(-1.1deg) translateX(-2px); }
-        50%      { transform: rotate(1.1deg)  translateX(2px); }
-      }
-      @keyframes foldShift {
-        0%, 100% { background-position-x: 0px; }
-        50%      { background-position-x: 14px; }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .flag-wrap { animation: none; }
-        .flag-cloth { filter: none; }
-        .flag-folds { animation: none; }
-      }
     </style>
   </head>
 
   <body>
-    <!-- Bayrak dalgalanma filtresi (SVG kumaş displacement efekti) -->
-    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-      <defs>
-        <filter id="flagWave" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.012 0.024" numOctaves="2" seed="7" result="noise">
-            <animate attributeName="baseFrequency" dur="9s"
-              values="0.012 0.024;0.016 0.03;0.012 0.024" repeatCount="indefinite"/>
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="14"
-            xChannelSelector="R" yChannelSelector="G"/>
-        </filter>
-      </defs>
-    </svg>
-
     <div class="relative h-screen w-full overflow-hidden bg-black text-white">
-      <!-- Arka plan videosu — overlay yok -->
-      <video
-        class="absolute inset-0 h-full w-full object-cover"
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
-        autoplay loop muted playsinline
-      ></video>
+      <!-- ===== ARKA PLAN ===== -->
+      <!-- Video veya animasyonlu arka planı buraya ekleyin (sıfırdan). -->
+      <!-- Örnek video: -->
+      <!-- <video class="absolute inset-0 h-full w-full object-cover" src="VIDEO_URL" autoplay loop muted playsinline></video> -->
 
-      <!-- Bina cephesinden sarkan Türk bayrağı -->
-      <div class="flag-wrap flag-wrap-turk" aria-label="Türk bayrağı">
-        <div class="flag-cloth flag-turk">
-          <svg class="flag-emblem" viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="42" cy="40" r="26" fill="#ffffff"/>
-            <circle cx="52" cy="40" r="21" fill="#E30A17"/>
-            <polygon fill="#ffffff" points="84,26 87.23,35.55 97.32,35.67 89.23,41.70 92.23,51.33 84,45.5 75.77,51.33 78.77,41.70 70.68,35.67 80.77,35.55"/>
-          </svg>
-          <div class="flag-folds"></div>
-        </div>
-      </div>
+      <!-- ===== BAYRAKLAR ===== -->
+      <!-- Bina cephesinden sarkan bayrakları buraya ekleyin (sıfırdan). -->
 
       <!-- Ön plan -->
       <div class="relative z-10 flex h-full flex-col">
