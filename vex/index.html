@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VEX</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Play CDN (sadece deneme/test için) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Inter', 'sans-serif'] },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+        background: #000;
+        color: #fff;
+      }
+
+      .liquid-glass {
+        background: rgba(0, 0, 0, 0.4);
+        background-blend-mode: luminosity;
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        position: relative;
+        overflow: hidden;
+      }
+      .liquid-glass::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1.4px;
+        background: linear-gradient(180deg,
+          rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 20%,
+          rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
+          rgba(255,255,255,0.1) 80%, rgba(255,255,255,0.3) 100%);
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+      }
+
+      /* Giriş animasyonları için başlangıç durumları */
+      .heading-char {
+        display: inline-block;
+        opacity: 0;
+        transform: translateX(-18px);
+        transition-property: opacity, transform;
+        transition-duration: 500ms;
+      }
+      .fade-in {
+        opacity: 0;
+        transition-property: opacity;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="relative h-screen w-full overflow-hidden bg-black text-white">
+      <!-- Arka plan videosu — overlay yok -->
+      <video
+        class="absolute inset-0 h-full w-full object-cover"
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260403_050628_c4e32401-fab4-4a27-b7a8-6e9291cd5959.mp4"
+        autoplay loop muted playsinline
+      ></video>
+
+      <!-- Ön plan -->
+      <div class="relative z-10 flex h-full flex-col">
+        <!-- Navbar -->
+        <div class="px-6 pt-6 md:px-12 lg:px-16">
+          <nav class="liquid-glass flex items-center justify-between rounded-xl px-4 py-2">
+            <div class="text-2xl font-semibold tracking-tight">VEX</div>
+            <div class="hidden items-center gap-8 md:flex">
+              <a href="#" class="text-sm transition-colors hover:text-gray-300">Story</a>
+              <a href="#" class="text-sm transition-colors hover:text-gray-300">Investing</a>
+              <a href="#" class="text-sm transition-colors hover:text-gray-300">Building</a>
+              <a href="#" class="text-sm transition-colors hover:text-gray-300">Advisory</a>
+            </div>
+            <button class="rounded-lg bg-white px-6 py-2 text-sm font-medium text-black transition-colors hover:bg-gray-100">
+              Start a Chat
+            </button>
+          </nav>
+        </div>
+
+        <!-- Hero içeriği, alta yaslı -->
+        <div class="flex flex-1 flex-col justify-end px-6 pb-12 md:px-12 lg:grid lg:grid-cols-2 lg:items-end lg:px-16 lg:pb-16">
+          <!-- Sol kolon -->
+          <div>
+            <h1
+              id="animated-heading"
+              class="mb-4 text-4xl font-normal md:text-5xl lg:text-6xl xl:text-7xl"
+              style="letter-spacing: -0.04em"
+              data-text="Shaping tomorrow&#10;with vision and action."
+            ></h1>
+
+            <p
+              class="fade-in mb-5 text-base text-gray-300 md:text-lg"
+              data-delay="800" data-duration="1000"
+            >
+              We back visionaries and craft ventures that define what comes next.
+            </p>
+
+            <div class="fade-in flex flex-wrap gap-4" data-delay="1200" data-duration="1000">
+              <button class="rounded-lg bg-white px-8 py-3 font-medium text-black">
+                Start a Chat
+              </button>
+              <button class="liquid-glass rounded-lg border border-white/20 px-8 py-3 font-medium text-white transition-colors hover:bg-white hover:text-black">
+                Explore Now
+              </button>
+            </div>
+          </div>
+
+          <!-- Sağ kolon — etiket -->
+          <div class="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+            <div
+              class="fade-in liquid-glass rounded-xl border border-white/20 px-6 py-3"
+              data-delay="1400" data-duration="1000"
+            >
+              <span class="text-lg font-light md:text-xl lg:text-2xl">
+                Investing. Building. Advisory.
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // AnimatedHeading: satır satır, karakter karakter staggered giriş
+      (function () {
+        var CHAR_DELAY = 30;     // ms
+        var INITIAL_DELAY = 200; // ms
+        var el = document.getElementById('animated-heading');
+        if (!el) return;
+
+        var text = el.getAttribute('data-text');
+        var lines = text.split('\n');
+
+        lines.forEach(function (line, lineIndex) {
+          var lineWrap = document.createElement('span');
+          lineWrap.className = 'block';
+          var lineLength = line.length;
+
+          line.split('').forEach(function (char, charIndex) {
+            var span = document.createElement('span');
+            span.className = 'heading-char';
+            span.style.transitionDelay =
+              (lineIndex * lineLength * CHAR_DELAY + charIndex * CHAR_DELAY) + 'ms';
+            span.textContent = char === ' ' ? '\u00A0' : char;
+            lineWrap.appendChild(span);
+          });
+
+          el.appendChild(lineWrap);
+        });
+
+        setTimeout(function () {
+          var chars = el.querySelectorAll('.heading-char');
+          chars.forEach(function (c) {
+            c.style.opacity = '1';
+            c.style.transform = 'translateX(0)';
+          });
+        }, INITIAL_DELAY);
+      })();
+
+      // FadeIn: data-delay sonrası opacity 0 -> 1
+      (function () {
+        var items = document.querySelectorAll('.fade-in');
+        items.forEach(function (item) {
+          var delay = parseInt(item.getAttribute('data-delay') || '0', 10);
+          var duration = parseInt(item.getAttribute('data-duration') || '1000', 10);
+          item.style.transitionDuration = duration + 'ms';
+          setTimeout(function () {
+            item.style.opacity = '1';
+          }, delay);
+        });
+      })();
+    </script>
+  </body>
+</html>
